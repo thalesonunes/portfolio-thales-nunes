@@ -1,0 +1,116 @@
+/* Importando Fontes Externas */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Condensed&display=swap');
+
+/* Resetando CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Ubuntu Condensed', sans-serif;
+}
+
+body {
+    background-color: #fafafa;
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.image {
+    background-color: black;
+    background-image: url(img/01.jpg);
+
+    width: 50vw;
+    height: 100vh;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.container{
+    margin: auto;
+    height: 500px;
+    width: 300px;
+}
+
+.container .avatar{
+    margin: 0 50px;
+    width: 200px;
+}
+
+.job{
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 900;
+    font-size: 16px;
+    color: dimgray;
+    text-align: center;
+}
+
+.name, .social-container, footer{
+    margin: 0 auto;
+    width: 80%;
+}
+
+.name img {
+    width: 240px;
+}
+
+.social-container{
+    width: 200px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.social {
+    margin-top: 60px;
+    align-items: center;
+    width: 90px;
+}
+
+.social:hover {
+    filter:drop-shadow(0px 0px 7px rgba(8, 191, 188, 0.5));
+}
+
+.footer {
+    align-items: center;
+}
+
+.footer p{
+    margin-top: 50px;
+    text-align: center;
+    font-size: 16px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.footer p::before, .footer p::after{
+    content: "";
+    display: inline-block;
+    background-color: black;
+    height: 1px;
+    width: 20px;
+    margin-right: 10px;
+    margin-bottom: 3px;
+}
+
+.footer p::after{
+    margin-left: 10px;
+}
+
+/* =================================================================== */
+
+@media (max-width: 600px)
+{
+    
+    .image{
+        display: none;
+    }
+
+    .footer p{
+        margin-top: 40px;
+    }
+
+}
