@@ -1,0 +1,3 @@
+if (navigator.userAgentData != undefined && navigator.userAgentData.mobile) {
+  alert("é mobile");
+}

@@ -531,3 +531,20 @@ https://www.youtube.com/watch?v=RacwEvoTz_Y&list=PLDgemkIT111AzoS1rB61sgMJbsEA4p
 Dark Mode
 
 https://www.youtube.com/watch?v=aXTO3ePaOkE
+
+
+
+
+
+
+
+
+
+SITES DE PORTFOLIO INETRESSANTES
+
+- https://www.charlieosborne.co/
+- https://www.lenonguyen.com/
+- https://changmade.com/
+- https://www.jespervos.com/
+- https://sevenmatheus.github.io/MyResume/
+
