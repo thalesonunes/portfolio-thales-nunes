@@ -252,19 +252,12 @@
 
   .content-section {
     max-width: 600px;
+    margin-right: 70px;
   }
 
   .intro-text {
     margin-bottom: var(--spacing-2xl);
 
-    .greeting {
-      display: block;
-      color: #999;
-      font-size: 1.1rem;
-      font-weight: 400;
-      margin-bottom: var(--spacing-sm);
-      letter-spacing: 0.5px;
-    }
 
     .name {
       font-size: clamp(2.5rem, 5vw, 4rem);
