@@ -1,6 +1,8 @@
 # Portfolio - Thales Nunes
 
-Portfolio pessoal de **Thales Nunes**, Engenheiro de Software Backend especializado em sistemas de alta performance para o setor financeiro. Este projeto demonstra a combinação única de expertise técnica em backend com formação em Design e UX.
+Portfolio pessoal de **Thales Nunes**, Engenheiro de Software especializado em sistemas de alta performance para o setor financeiro. Este projeto demonstra a combinação única de expertise técnica com formação em Design e UX.
+
+✨ **Deploy automático configurado com GitHub Actions + Vercel**
 
 ## 👨‍💻 Sobre
 
