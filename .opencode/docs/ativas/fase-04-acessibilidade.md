@@ -319,3 +319,56 @@ Cada task deve:
 - Relatório Lighthouse JSON/HTML: `/tmp/opencode/lighthouse-baseline/report.{json,html}` (fora do repo)
 - Screenshot hero desktop: `/tmp/opencode/lighthouse-baseline/hero-desktop.png` (fora do repo)
 - Dados de DOM/CSS coletados via `chrome-devtools_evaluate_script` (getComputedStyle/getBoundingClientRect): focusables 22 (18 fora da viewport no 1º Tab), headings 23, contrastes calculados via WCAG fórmula
+
+---
+
+## TASKs 2-5 — Implementação (delta)
+
+**Data:** 06/08/2026 — `frontend-portfolio` na branch `feature/fase-04-acessibilidade`.
+
+### Mudanças por arquivo
+
+| Arquivo | Mudanças |
+|---|---|
+| `app.html` | Skip link logo após `.app-container`; `<nav id="sidebar" aria-label="Navegação principal" [attr.inert]>`; logo `h3`→`<p class="logo-name">`; `aria-label`+`aria-expanded`+`aria-controls` nos 2 toggles; `aria-label` nos 3 links sociais (substituindo `title`) e nos 6 links de projeto; `aria-hidden="true"`+`focusable="false"` nos 9 SVGs; `aria-hidden="true"` nos 12 `material-icons`; `<main id="main-content" tabindex="-1">`; skills `h4`→`h3` |
+| `app.scss` | `.skip-link` sempre visível (pill accent fixa no topo, z-index 2000, hover/focus); seletor do logo `h3`→`.logo-name`; `.social-links a` `rgb(144 131 136 / 70%)`→`rgb(168 158 162)` sólido; `.btn-primary` e `.project-link` `color: white`→`var(--bg-primary)`; `.skill-item h4`→`h3`; overlay de projetos ganhou `&:focus-within` (visível no Tab); **removidos ~135 linhas de código morto** (`.tech-categories/.tech-category/.tech-items/.tech-item` e `.stats/.stat-item` — nenhuma classe existe no template) |
+| `styles.scss` | `:focus` e `:focus-visible` com `outline: 2px solid var(--accent-primary)` + `outline-offset: 2px` (universal — cobre `a`, `button`, `[tabindex]` e derivados); `#main-content:focus { outline: none }` (target do skip link é landmark não-interativo) |
+
+### Decisões técnicas
+
+1. **2.4.3 Focus order — `inert` (não `tabindex` dinâmico)**: `[attr.inert]="sidebarOpen ? null : ''"` no `<nav>`. Verificado no browser que **a sidebar fica off-screen em TODAS as viewports quando fechada** (`left: -280px`; não existe media query de "sidebar sempre visível" no desktop — a suposição do plano estava incorreta; no desktop o 1º Tab caía no "Home" invisível, conforme audit). `inert` remove os 10 controles da tab order E da árvore de acessibilidade nativamente (suporte universal desde 2023), é testável e não exige manipulação de DOM. Sem `tabindex` dinâmico: mais código, risco de inconsistência entre estado e atributos.
+2. **Contraste 1.4.3 — texto escuro sobre accent (mantém identidade)**: em vez de escurecer `--accent-primary` (mudaria a cor da marca), `.btn-primary` e `.project-link` passam a usar `color: var(--bg-primary)` (`#020008`) sobre `#ff6b35` → **7.36:1** (hover `#e55a2b` → 5.79:1). Consistente com o `.btn-primary` do `styles.scss` (já usava texto escuro). Ícones sociais: `rgb(168 158 162)` sólido → **6.76:1** sobre o sidebar (era 3.00:1 com 70% de opacidade).
+3. **Skip link sempre visível**: pill fixa no topo-centro (`left: 50%`), não sobrepõe o `.menu-toggle` (que fica à esquerda). Contraste 7.36:1.
+4. **Headings**: logo da sidebar `h3`→`<p>` (não-heading com estilo mantido); skills `h4`→`h3` (agora `H2 → H3` sem pulo). Experiência mantém `h3` (cargo) → `h4` (empresa), sequencial.
+5. **Overlay hover-only**: `:focus-within` no `.project-image` mostra o overlay quando um `.project-link` recebe foco via Tab (achado 12).
+6. **Focus outline**: outline accent funciona no tema escuro (6.14:1 sobre `#1a1a1a`, 7.36:1 sobre `#020008`) — outline é desenhado FORA do elemento, nunca sobre o próprio botão laranja, então não há conflito com fundos accent. Único `outline: none` é intencional e não-interativo (`#main-content`).
+7. **Fora de escopo (documentado)**: ao abrir o drawer, o foco NÃO é movido automaticamente para o 1º item (APG recomenda, mas muda o comportamento do `toggleSidebar()` — proibido pela regra "não alterar funcionalidades"; os controles ficam alcançáveis via Shift+Tab). Candidato a follow-up com os testes da TASK 6.
+
+### Re-auditoria (Lighthouse a11y, desktop, `http://127.0.0.1:4201/`)
+
+**Antes: 90/100** (3 failures: `link-name` 6 links, `heading-order`) → **Depois: 100/100** (48 passed · 0 failed). Demais categorias mantidas em 100 (Best Practices, SEO).
+
+### Validação executada
+
+| Comando | Resultado |
+|---|---|
+| `npm run lint` | 0 problems |
+| `npm run lint:styles` | 0 problems |
+| `npm run typecheck` | exit 0 |
+| `npm test` | 15/15 SUCCESS |
+| `npm run build` | OK — initial 284.47 kB (budget 500 kB), styles 14.28 kB (budget 25 kB) |
+
+### Verificação manual (browser, DevTools MCP)
+
+- 1º Tab → skip link (visível, outline accent) → 2º Tab → `.menu-toggle` (sidebar inert pulada) → botões do hero → project-links → contatos. Nenhum controle off-screen na tab order (desktop 1440px e mobile 375px).
+- Skip link: Enter move foco para `<main id="main-content">` (sem ring gigante).
+- Toggle: `aria-expanded` alterna `false`↔`true`, `aria-label` alterna "Abrir menu"↔"Fechar menu", `inert` removido ao abrir (controles da sidebar focáveis/relevados na a11y tree).
+- Overlay dos projetos: visível (`opacity: 1`) ao Tab nos `.project-link`.
+- Headings sequenciais: H1 → H2 → H3 → H4, sem pulos; logo da sidebar não é mais heading.
+- A11y tree: 6 links de projeto nomeados, 3 sociais nomeados, 12 ícones e 9 SVGs ocultos, nav landmark "Navegação principal".
+
+### Achados do plano NÃO endereçados (por quê)
+
+- **Foco automático no drawer ao abrir** (APG drawer pattern): deferido — alteraria `toggleSidebar()` (regra de não mudar funcionalidades) e os testes são da TASK 6/QA.
+- **Contraste do texto do hero sobre a foto `eu-panoramico.jpg`** (📝 verificação manual): requer olho humano; nada mudou no hero além do botão primário.
+- **Target size 44px (2.5.5 AAA)**: não requerido para AA (2.5.8 já passa — todos ≥ 24px).

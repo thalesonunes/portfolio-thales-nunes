@@ -50,6 +50,22 @@ body {
   overflow-x: hidden;
 }
 
+/* Focus visible — WCAG 2.4.7 */
+:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Skip-link target (non-interactive landmark): keep the scroll jump, drop the full-page ring */
+#main-content:focus {
+  outline: none;
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
