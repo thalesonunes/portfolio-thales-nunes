@@ -14,7 +14,7 @@ Prepare uma Pull Request pronta para revisão do portfolio.
 
 ## Instruções
 - Leia a diff e identifique o propósito principal da mudança
-- Estruture a PR para alguém que não viu o contexto anterior
+- Estruture a PR seguindo o template em `.github/pull_request_template.md`
 - Use português objetivo e tom profissional
 - Não invente testes, decisões ou resultados
 - Se faltar informação, marque como pendente em vez de supor

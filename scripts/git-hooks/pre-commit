@@ -1,0 +1,32 @@
+#!/bin/sh
+# Pre-commit hook — validações rápidas antes do commit
+# Instalar: ln -sf ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit
+
+echo "🔍 Pre-commit: validando..."
+
+# ⛔ Bloquear commits diretos nas branches protegidas
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+case "$BRANCH" in
+  main|master)
+    echo "  🚫 Commits diretos em '$BRANCH' são proibidos!"
+    echo "  Crie uma branch: git checkout -b feature/fase-NNN-descricao"
+    exit 1
+    ;;
+esac
+
+# Verifica se não há secrets sendo commitados
+if git diff --cached --name-only | grep -qE '(secret|private_key|\.pem|\.env$|\.env\.)' | grep -qvE '\.(ts|html|scss|spec\.ts)$'; then
+  echo "⚠️  ATENÇÃO: Arquivos potencialmente sensíveis detectados:"
+  git diff --cached --name-only | grep -E 'secret|private_key|password|\.env$'
+  echo ""
+  echo "   Verifique antes de commitar. Para forçar: git commit --no-verify"
+fi
+
+# Verifica se há arquivos .opencode/package.json sendo commitados (gerado localmente pelo opencode)
+if git diff --cached --name-only | grep -q '\.opencode/package.json\|\.opencode/package-lock.json'; then
+  echo "⚠️  ATENÇÃO: .opencode/package.json e package-lock.json são gerados localmente"
+  echo "   e devem permanecer ignorados (.opencode/.gitignore)."
+  echo "   Remova do staging: git reset .opencode/package*.json"
+fi
+
+echo "✅ Pre-commit OK"

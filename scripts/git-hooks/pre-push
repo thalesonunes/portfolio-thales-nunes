@@ -1,0 +1,22 @@
+#!/bin/sh
+# Pre-push hook — validações rápidas antes do push
+# Testes completos rodam no CI (GitHub Actions)
+# Instalar: ln -sf ../../scripts/git-hooks/pre-push .git/hooks/pre-push
+
+echo "🔍 Pre-push: validando..."
+
+HAS_FRONTEND=$(git diff --name-only origin/main...HEAD 2>/dev/null | grep -c 'portfolio/' || echo 0)
+
+if [ "$HAS_FRONTEND" -gt 0 ] 2>/dev/null; then
+  if [ -f portfolio/package.json ] && [ -d portfolio/node_modules ]; then
+    echo "  → Frontend: build de produção..."
+    if ! (cd portfolio && npm run build 2>&1); then
+      echo "  ❌ Frontend build falhou."
+      exit 1
+    fi
+  else
+    echo "  ⚠️  portfolio/node_modules não encontrado — pulando build (rode 'cd portfolio && npm install')"
+  fi
+fi
+
+echo "✅ Pre-push OK (testes completos rodam no CI)"

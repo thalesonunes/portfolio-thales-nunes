@@ -185,7 +185,7 @@ Para fases com escopo reduzido (single feature, correção grande, etc.), usar:
 |---|---|---|
 | Arquivo da fase | `fase-XX-descricao-curta.md` | `fase-01-hero-redesign.md` |
 | Branch | `feature/fase-XX-descricao-curta` | `feature/fase-01-hero-redesign` |
-| Commits | Convencional (imperativo, presente) | `feat(hero): redesign hero section` |
+| Commits | Seguir `.gitmessage` (tipo(escopo): descrição, imperativo) | `feat(hero): redesign hero section` |
 
 ## Status
 

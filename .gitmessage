@@ -1,0 +1,15 @@
+# Título: Descrever a mudança em ~50 caracteres
+# Formato: tipo(escopo): descrição
+# Ex: feat(hero): adicionar animação de entrada
+
+# Corpo: Explicar o que e por que vs. como
+# - Use o tempo presente ("add feature" não "added feature")
+# - Use o modo imperativo ("move cursor to..." não "moves cursor to...")
+# - Incluir motivação para a mudança e contraste com comportamento anterior
+
+# Rodapé: referenciar issues e breaking changes
+# Closes #123
+# BREAKING CHANGE: descrição da breaking change
+
+# Tipos válidos: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, breaking
+# Escopo: seção do portfolio (hero, sobre, competencias, projetos, experiencia, contato, sidebar, harness)
