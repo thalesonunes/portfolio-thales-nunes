@@ -8,7 +8,7 @@
 
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
-|    |              |        |           |
+| 05 | Revisão completa do layout mobile e responsividade | 📋 Planejada | `fase-05-revisao-mobile.md` |
 
 ---
 
