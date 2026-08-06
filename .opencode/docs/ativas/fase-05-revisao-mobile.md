@@ -230,3 +230,123 @@ Cada task deve:
 - [ ] Lints zerados, typecheck OK, build OK (budgets)
 - [ ] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
 - [ ] Revisão final (`review-portfolio`) aprovada
+
+---
+
+## Resultado da Auditoria Responsiva (baseline)
+
+**Executada em:** 06/08/2026 (TASK 1 — `frontend-portfolio`)
+**Método:** Playwright MCP (`browser_run_code_unsafe`) — viewport via `setViewportSize`, medições via `evaluate` (getBoundingClientRect/scrollWidth/clientWidth), overflow exposto via `document.body.style.overflowX = 'visible'` (JS, **sem editar arquivos**). Servidor dev na porta 4201 (Angular 20/Vite).
+**Nota de transparência:** o modelo de auditoria não suporta leitura de imagens; a classificação dos achados baseia-se nas **medições objetivas via evaluate**, e os screenshots servem como evidência visual para inspeção humana na TASK 5 (comparação antes/depois).
+
+### 1. Medições objetivas de overflow (overflow-x hidden removido via JS)
+
+| Viewport | `docScrollW` | `docClientW` | Overflow real (px) | Seções com `scrollWidth > clientWidth` |
+|---|---|---|---|---|
+| 320×568 | **485** | 308 | **177** | `experience` (485 > 444) |
+| 375×667 | **486** | 363 | **123** | `experience` (486 > 444) |
+| 768×1024 | 756 | 756 | 0 | nenhuma |
+| 1024×768 | 1012 | 1012 | 0 | nenhuma |
+| 1280×800 | 1268 | 1268 | 0 | nenhuma |
+| 1440×900 | 1428 | 1428 | 0 | nenhuma |
+
+> `docClientW` < viewport em 320/375 por causa do scrollbar vertical (~12px), esperado.
+
+**Estado real do usuário (com `overflow-x: hidden` ativo no body, styles.scss:50):**
+- 320: `scrollWidth` 481 > `clientWidth` 308 → overflow **mascarado**; ~165px de conteúdo cortado/invisível à direita
+- 375: `scrollWidth` 487 > `clientWidth` 363 → overflow mascarado; ~111px cortados
+
+### 2. Causa raiz do overflow em 320/375 (confirmada por medição)
+
+1. **`.timeline` em ≤768px usa o layout desktop** (`position: absolute` + `calc(50% + 30px)`, app.scss:685-721) — não há media query mobile para a timeline (o tablet 769-1024 não cobre 768):
+   - Em 320: container da timeline = 380px → `calc(50% + 30px)` = **220px** → `.timeline-content` (229px, `margin-left: 220px`) atinge **right 486px** (166px além do viewport)
+   - `.main-content` (flex `min-width: auto`) estoura para **444px**, arrastando todas as seções (hero/about/skills/projects/contact com scrollWidth 444)
+2. **Grid de projetos `minmax(380px, 1fr)`** (app.scss:475): coluna fixa de **380px** em 320 (card 32→412, além do viewport) e 375 (card até 412). Em 768 coluna 692px (ok). Ao corrigir a timeline (item 1), o container em 320 encolhe para ~256px e o grid 380px passará a estourar sozinho — corrigir junto.
+
+### 3. Tabela viewport × seção × problema
+
+| Viewport | Seção | Problema | Prio | Evidência (screenshot) |
+|---|---|---|---|---|
+| 320×568 | Experiência | Timeline desktop: `.timeline-content` até 486px (166px além); overflow global 177px | **P0** | `vp-320-overflow-exposed.png`, `vp-320x568-full.png` |
+| 320×568 | Projetos | Coluna do grid fixa em 380px (card 32→412); 92px além do viewport | **P0** | `vp-320-projects-grid.png` |
+| 320×568 | Todas | Overflow mascarado por `overflow-x: hidden` → conteúdo cortado invisível (~165px) | **P0** | `vp-320x568-full.png` (borda direita cortada) |
+| 320×568 | Sidebar/toggle | `skip-link` (z 2000) cobre `.menu-toggle.active` (z 1001): overlap 19px; **clique físico falhou** (Playwright timeout) → não fecha a sidebar clicando no toggle | **P1** | `vp-320-hero-sidebar-toggle-collision.png` |
+| 375×667 | Experiência | Timeline desktop: overflow global 123px; `.timeline-content` até 486px | **P0** | `vp-375-overflow-exposed.png`, `vp-375x667-full.png` |
+| 375×667 | Projetos | Coluna 380px (card até 412 > 375) | **P0** | `vp-375x667-full.png` |
+| 375×667 | Todas | Overflow mascarado (~111px cortados) | **P0** | `vp-375x667-full.png` |
+| 768×1024 | Experiência | Timeline ainda no layout absoluto (sem media query ≤768) — sem overflow global, mas layout desktop inapropriado em tablet portrait | **P2** | `vp-768x1024-full.png` |
+| 1024×768 | Experiência | **Datas `position: absolute` sobrepõem o conteúdo** — overlap horizontal 148–156px nos 3 itens (media query tablet não reseta `position`) | **P1** | `vp-1024x768-timeline-overlap.png` |
+| 1280/1440 | — | Sem problemas (0 overflow, timeline desktop correta) | — | `vp-1280x800-full.png`, `vp-1440x900-full.png` |
+
+### 4. Touch targets (getBoundingClientRect)
+
+| Controle | 320 | 375 | 768 | 1024+ |
+|---|---|---|---|---|
+| `.menu-toggle` | 40×40 ✓ | 40×40 ✓ | 40×40 ✓ | 40×40 ✓ |
+| `.sidebar-toggle` | 40×40 ✓ | 40×40 ✓ | 40×40 ✓ | 0×0 (display:none — correto) |
+| `.project-link` (6×) | 50×50 ✓ | 50×50 ✓ | 50×50 ✓ | 50×50 ✓ |
+| `.contact-item` (3×) | 200–220×92 ✓ | ✓ | ✓ | ✓ |
+| `.social-links a` (3×) | 40×40 ✓ | 40×40 ✓ | 40×40 ✓ | 40×40 ✓ |
+
+**Nenhum touch target abaixo de 24px** (AA ✓). Nenhuma correção necessária na TASK 2.3.
+
+### 5. Timeline — sobreposição `.timeline-date` × `.timeline-content`
+
+| Viewport | Sobreposição? | Medição |
+|---|---|---|
+| 320×568 | Não (datas em `left/right: calc(50% + 30px)` do lado oposto) | date 180–188px nowrap; mas causa o overflow da seção (P0) |
+| 375×667 | Não | idem |
+| 1024×768 | **Sim — 148/152/156px de overlap horizontal** nos 3 itens | `datePos: absolute`; date 547–703 × content 123–975 (P1) |
+| 1280×800 | Não | layout desktop ok |
+| 1440×900 | Não | layout desktop ok |
+
+### 6. `.menu-toggle.active` em 320px (left `calc(180px + var(--spacing-lg))` = 212px)
+
+- Rect ativo: **212–252 × 32–72**. Não sobrepõe texto do hero (hero `.name` começa em top 89; overlaps: false).
+- **Porém** colide com o `skip-link` (77–231 × 8–73, z-index 2000 > 1001) → hit-area parcialmente bloqueada e clique bloqueado (P1, ver item 3).
+- A posição deriva da largura fixa da sidebar (280px) — frágil se a sidebar mudar na TASK 2 (P2).
+
+### 7. Tipografia (320/375, `scrollWidth` vs `clientWidth` do próprio elemento)
+
+- **Nenhum título/parágrafo estoura o próprio container** (ex.: hero `.name` 342px = scrollW; section-title 380px = scrollW) — os "cortes" medidos são consequência do container estourado (main-content 444px), não de texto.
+- Após corrigir o container (~256px em 320): hero `.name` 32px (clamp min) tende a quebrar em 2 linhas; section-title 32px é folgado para 320 — **refinamento na TASK 3** (P2).
+- Computed styles em 320: hero name 32px/1.1, title 20.8px, desc 16px; section-title 32px; skill h3 20.8px. Line-heights ok.
+
+### 8. Alinhamento / outros
+
+- Respiro horizontal consistente: seções `44.8px 32px`, hero-container `0 32px` → 32px em todas. `.container` app.scss sobrescreve padding horizontal do styles.scss (`50px 0`) — ok, o respiro vem das seções.
+- Inert da sidebar: correto (não-inerte quando aberta; main nunca inerte — por design da Fase 04).
+- Navegação smooth/toggle: funcionam (medição de estado), exceto o bloqueio de clique do skip-link em 320 (P1).
+- `scrollToSection` com `window.innerWidth <= 768` hardcoded (app.ts:31) — atualizar se breakpoint da sidebar mudar (P2, risco conhecido do plano).
+
+### 9. Lista priorizada de correções para TASKs 2-3
+
+**P0 (quebra de layout — TASK 2):**
+1. **Timeline em ≤768px**: criar media query mobile (bloco, linha à esquerda, datacima do conteúdo) — reaproveitar o padrão do tablet 769-1024 (que não cobre 768). Elimina o overflow de 320/375 e o estouro do `.main-content` (444px).
+2. **Grid de projetos**: `minmax(380px, 1fr)` → `minmax(min(100%, 380px), 1fr)` (ou 1 coluna em ≤768). Validar em 320 após corrigir a timeline.
+3. **`overflow-x: hidden` no body**: manter apenas como salvaguarda residual APÓS eliminar as fontes reais de overflow; nunca como máscara de bug. (Verificar se ainda é necessário; preferir remover com as fontes corrigidas.)
+
+**P1 (sobreposto/interação — TASK 2):**
+4. **Timeline em 1024×768**: adicionar `position: static !important` (ou reset adequado) ao `.timeline-date` no media query 769-1024 — hoje as datas absolutas sobrepõem o conteúdo em 148–156px.
+5. **skip-link × menu-toggle em 320**: o skip-link sempre visível (WCAG 2.4.1) bloqueia o clique no toggle ativo. Corrigir com padrão off-screen/focus-only (skip-link oculto até `:focus`) ou reposicionar o toggle ativo. Não regredir a11y (Lighthouse 100).
+
+**P2 (refinamento — TASK 3):**
+6. Hero name/title em 320: ajustar clamp para quebrar bem em ~256px de container (evitar 2 linhas desequilibradas).
+7. Section-title 32px em 320: reduzir via clamp (ex.: `clamp(1.75rem, 7vw, 2.5rem)`).
+8. Contact items em 320: padding `32px 48px` + `min-width 200px` é folgado para 320 — revisar espaçamento pós-correção do container.
+9. `scrollToSection` (app.ts:31): parametrizar o breakpoint de fechamento da sidebar (hoje 768 hardcoded).
+
+### 10. Screenshots salvos (evidência visual — `/tmp/opencode/fase05/`)
+
+```
+vp-320x568-full.png                    vp-320x568-sidebar-open.png
+vp-375x667-full.png                    vp-375x667-sidebar-open.png
+vp-768x1024-full.png                   vp-768x1024-sidebar-open.png
+vp-1024x768-full.png                   vp-1280x800-full.png
+vp-1440x900-full.png
+vp-320-overflow-exposed.png            vp-375-overflow-exposed.png
+vp-1024x768-timeline-overlap.png       vp-320-hero-sidebar-toggle-collision.png
+vp-320-projects-grid.png
+```
+
+**Working tree:** limpo ao final da auditoria (nenhum arquivo de código editado; `overflow-x: hidden` NÃO foi alterado em `styles.scss` — exposto apenas via `document.body.style.overflowX = 'visible'` no runtime, revertido ao final). Única mudança: este documento.
