@@ -39,6 +39,14 @@ Auditoria e correção do comportamento responsivo do portfolio em **6 viewports
 - Mobile-first, breakpoints 768/1024
 - Não alterar funcionalidades (navegação, scroll, toggle)
 
+### Riscos conhecidos (do review do plano — TASK 0)
+
+- 🔴 **`body { overflow-x: hidden }` em `styles.scss:50` mascara scroll horizontal** — a auditoria precisará comentar essa linha temporariamente para detectar overflow real
+- 🔴 **Grid de projetos `minmax(380px, 1fr)` em `app.scss:472`** — 380px > viewport 320px, overflow garantido em 320px; corrigir com `minmax(min(100%, 380px), 1fr)` ou media query
+- 🟠 **Timeline `position: absolute` com `left/right: calc(50% + 30px)` + `margin: calc(50% + 30px)` (app.scss:685-721)** — em 320px sobram ~130px para `.timeline-content`; verificar sobreposição/overflow de datas
+- 🟠 **`menu-toggle.active` com `left: calc(180px + var(--spacing-lg))`** (app.scss:219) — em 320px fica ~212px da esquerda, sobrando ~108px; verificar colisão com conteúdo
+- 🟡 **`scrollToSection` tem `window.innerWidth <= 768` hardcoded** (app.ts:31) — se breakpoints mudarem, atualizar
+
 ---
 
 ## Tasks
@@ -66,16 +74,18 @@ Auditoria e correção do comportamento responsivo do portfolio em **6 viewports
 #### Subtask 1.1 — Screenshots por viewport
 - Playwright MCP: para cada viewport (320, 375, 768, 1024, 1280, 1440), navegar e capturar **todas** as seções (fullPage) + sidebar aberta
 - Salvar evidências (ex: `/tmp/opencode/fase05/`)
+- **Antes dos screenshots: comentar temporariamente `overflow-x: hidden` no `body`** (styles.scss:50) para expor overflow real; restaurar ao final da TASK 2
 
 #### Subtask 1.2 — Checklist de problemas
 Para cada viewport/seção, verificar e registrar:
-- Scroll horizontal (documento e por seção)
+- Scroll horizontal: **medição objetiva** via evaluate: `document.documentElement.scrollWidth > document.documentElement.clientWidth` → deve ser `false`; por seção: `element.scrollWidth > element.clientWidth`
 - Conteúdo cortado/sobreposto (textos, cards, timeline)
-- Touch targets < 24px (AA) em controles (toggles, ícones sociais, links de projeto)
+- Touch targets: para cada controle (`menu-toggle`, `sidebar-toggle`, `project-link`, `contact-item`, sociais) medir via `getBoundingClientRect()`: `width >= 24 && height >= 24`
 - Alinhamento consistente (grids, margens, paddings)
 - Hierarquia tipográfica (títulos/parágrafos legíveis, sem overflow de linha)
 - Sidebar/toggle: comportamento correto (abre/fecha, não bloqueia, inert ok)
-- Timeline: datas e conteúdo sem sobreposição em 320px
+- **Timeline**: verificar que datas (`position: absolute`) não sobrepõem conteúdo nem causam overflow em 320px (margem `calc(50% + 30px)` deixa ~130px para `.timeline-content`)
+- **`menu-toggle.active`**: verificar que não colide com o conteúdo principal em 320px (left ~212px)
 
 #### Subtask 1.3 — Documentar baseline
 - Seção "Resultado da Auditoria Responsiva" no documento da fase: tabela viewport × seção × problema (com screenshot referenciado)
@@ -92,6 +102,7 @@ Para cada viewport/seção, verificar e registrar:
 
 #### Subtask 2.1 — Scroll horizontal e overflow
 - Identificar fontes de overflow (elementos com largura fixa > viewport, grid com min-width, timeline com margens absolutas) e corrigir com unidades fluidas (min(%, px), clamp), `overflow-x` apenas se necessário e justificado
+- **Grid de projetos**: corrigir `minmax(380px, 1fr)` → `minmax(min(100%, 380px), 1fr)` ou media query para 1 coluna
 - Verificar em 320px (caso mais restrito)
 
 #### Subtask 2.2 — Conteúdo cortado/sobreposto
@@ -135,7 +146,7 @@ Para cada viewport/seção, verificar e registrar:
 **Escopo:** `app.spec.ts` + validação.
 
 #### Subtask 4.1 — Specs novos (qa)
-- Teste de **ausência de overflow horizontal** no container principal (simular viewport 320px via jsdom/window resize se viável no Karma; senão, teste DOM: verificar que elementos principais não têm largura fixa > 320px no estilo computado — avaliar viabilidade no Karma/Chrome real)
+- Teste de **ausência de overflow horizontal** no container principal: **decidir abordagem agora** — o Karma roda em Chrome real; verificar se `window.innerWidth` pode ser emulado (`window.resizeTo` / dispatch de resize). Se viável, medir `document.documentElement.scrollWidth <= clientWidth` em 320px; se não, fallback estrutural: verificar computed style de `.projects-grid` (`minmax` não exceder viewport) e ausência de larguras fixas > 320px
 - Teste de touch targets: toggles e links de projeto com hit-area ≥ 24px (getBoundingClientRect no Chrome real do Karma)
 - Testes existentes (21) preservados
 
@@ -209,9 +220,9 @@ Cada task deve:
 
 - [ ] **Review do plano realizado antes da implementação** (TASK 0) — ata registrada
 - [ ] Auditoria baseline documentada com screenshots (6 viewports × todas as seções)
-- [ ] 0 scroll horizontal nos 6 viewports
+- [ ] 0 scroll horizontal nos 6 viewports — **medição objetiva**: `document.documentElement.scrollWidth <= document.documentElement.clientWidth` (false para overflow)
 - [ ] 0 conteúdo cortado/sobreposto nos 6 viewports
-- [ ] Touch targets ≥ 24px (AA) em todos os controles
+- [ ] Touch targets ≥ 24px (AA) em todos os controles — medidos via `getBoundingClientRect()`
 - [ ] Alinhamento consistente entre viewports
 - [ ] Tipografia refinada e legível em ≤ 768px
 - [ ] Lighthouse a11y mantido em 100/100
