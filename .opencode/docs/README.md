@@ -8,7 +8,7 @@
 
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
-|    |              |        |           |
+| 06 | Otimização de imagens (WebP, srcset, lazy loading) | 📋 Planejada | `fase-06-otimizacao-imagens.md` |
 
 ---
 
