@@ -4,6 +4,35 @@
   min-height: 100vh;
 }
 
+// Skip Link - always visible, WCAG 2.4.1 Bypass Blocks
+.skip-link {
+  position: fixed;
+  top: var(--spacing-sm);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 30%);
+  transition: background 0.3s ease, transform 0.3s ease;
+
+  &:hover {
+    background: var(--accent-secondary);
+    transform: translateX(-50%) translateY(-1px);
+  }
+
+  &:focus {
+    background: var(--accent-secondary);
+  }
+}
+
 .sidebar {
   position: fixed;
   left: -280px;
@@ -27,7 +56,7 @@
     padding: var(--spacing-lg);
     border-bottom: 1px solid rgb(255 107 53 / 10%);
 
-    :where(.logo) h3 {
+    :where(.logo) .logo-name {
       margin: 0;
       color: var(--text-primary);
       font-weight: 700;
@@ -117,7 +146,7 @@
         justify-content: center;
         width: 40px;
         height: 40px;
-        color: rgb(144 131 136 / 70%);
+        color: rgb(168 158 162);
         transition: all 0.3s ease;
         border-radius: var(--radius-md);
         border: 1px solid rgb(144 131 136 / 30%);
@@ -306,7 +335,7 @@
 
     .btn-primary {
       background: #ff6b35;
-      color: white;
+      color: var(--bg-primary);
       box-shadow: 0 4px 16px rgb(255 107 53 / 30%);
 
       &:hover {
@@ -376,44 +405,6 @@
   padding: 50px 0;
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-lg);
-  margin-top: var(--spacing-xl);
-
-  .stat-item {
-    text-align: center;
-    padding: var(--spacing-lg);
-    background: rgb(255 255 255 / 2%);
-    border-radius: 16px;
-    border: 1px solid rgb(255 255 255 / 5%);
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: rgb(255 255 255 / 5%);
-      border-color: rgb(255 107 53 / 30%);
-      transform: translateY(-5px);
-    }
-
-    .stat-number {
-      display: block;
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #ff6b35;
-      margin-bottom: var(--spacing-xs);
-      line-height: 1;
-    }
-
-    .stat-label {
-      color: #999;
-      font-size: 0.9rem;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-    }
-  }
-}
-
 // Skills Section - Independent Section Styling
 .skills-section {
   .skills-grid {
@@ -458,7 +449,7 @@
         font-feature-settings: 'liga';
       }
 
-      h4 {
+      h3 {
         color: #fff;
         font-size: 1.3rem;
         font-weight: 600;
@@ -475,110 +466,6 @@
     }
   }
 
-  .tech-categories {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: var(--spacing-2xl);
-  }
-
-  .tech-category {
-    background: rgb(255 255 255 / 2%);
-    padding: var(--spacing-2xl);
-    border-radius: 20px;
-    border: 1px solid rgb(255 255 255 / 5%);
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: rgb(255 255 255 / 5%);
-      border-color: rgb(255 107 53 / 20%);
-      transform: translateY(-8px);
-    }
-
-    h3 {
-      color: #fff;
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: var(--spacing-xl);
-      text-align: center;
-      position: relative;
-
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: -8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40px;
-        height: 2px;
-        background: #ff6b35;
-        border-radius: 1px;
-      }
-    }
-  }
-
-  .tech-items {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-  }
-
-  .tech-item {
-    position: relative;
-
-    .tech-name {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--spacing-sm);
-      color: #fff;
-      font-weight: 500;
-      font-size: 1rem;
-
-      .tech-percentage {
-        color: #ff6b35;
-        font-weight: 600;
-        font-size: 0.9rem;
-      }
-    }
-
-    .tech-bar {
-      height: 6px;
-      background: rgb(255 255 255 / 10%);
-      border-radius: 3px;
-      overflow: hidden;
-      position: relative;
-
-      .tech-progress {
-        height: 100%;
-        background: linear-gradient(90deg, #ff6b35, #ff8a5c);
-        border-radius: 3px;
-        width: 0;
-        transition: width 2s ease 0.8s;
-        position: relative;
-        box-shadow: 0 0 10px rgb(255 107 53 / 30%);
-
-        &[data-progress="90%"] { width: 90%; }
-        &[data-progress="85%"] { width: 85%; }
-        &[data-progress="80%"] { width: 80%; }
-        &[data-progress="75%"] { width: 75%; }
-        &[data-progress="70%"] { width: 70%; }
-        &[data-progress="95%"] { width: 95%; }
-
-        &::after {
-          content: '';
-          position: absolute;
-          right: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 6px;
-          height: 6px;
-          background: rgb(255 255 255 / 80%);
-          border-radius: 50%;
-          box-shadow: 0 0 8px rgb(255 107 53 / 60%);
-        }
-      }
-    }
-  }
 }
 
 // Projects Section - Professional Portfolio Showcase
@@ -640,7 +527,7 @@
             width: 50px;
             height: 50px;
             background: #ff6b35;
-            color: white;
+            color: var(--bg-primary);
             border-radius: 12px;
             text-decoration: none;
             transition: all 0.3s ease;
@@ -655,7 +542,8 @@
         }
       }
 
-      &:hover .project-overlay {
+      &:hover .project-overlay,
+      &:focus-within .project-overlay {
         opacity: 1;
       }
     }
@@ -1055,11 +943,6 @@
     gap: var(--spacing-lg);
   }
 
-  .skills-section .tech-categories {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-xl);
-  }
-
   .projects-section .projects-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-xl);
@@ -1106,11 +989,6 @@
         padding: var(--spacing-lg);
       }
     }
-  }
-
-  .stats {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
   }
 
   .contact-methods {

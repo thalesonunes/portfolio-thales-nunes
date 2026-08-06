@@ -19,6 +19,7 @@
 | 01 | Cálculo automático de experiência (Sobre Mim) | ✅ Concluída | `fase-01-calculo-experiencia.md` |
 | 02 | Correção segurança/SEO: rel noopener, favicon e typo SVG | ✅ Concluída | `fase-02-links-noopener-e-favicon.md` |
 | 03 | Lint (ESLint + stylelint) e typecheck com CI | ✅ Concluída | `fase-03-lint-typecheck.md` |
+| 04 | Acessibilidade: Auditoria WCAG 2.1 AA + Correções | ✅ Concluída | `fase-04-acessibilidade.md` |
 
 ---
 

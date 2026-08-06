@@ -1,0 +1,413 @@
+# Fase 04 — Acessibilidade: Auditoria WCAG 2.1 AA + Correções
+
+**Branch:** `feature/fase-04-acessibilidade`
+**Status:** ✅ Concluída
+
+---
+
+## Visão Geral
+
+Eleva o portfolio à conformidade **WCAG 2.1 nível AA**. A auditoria inicial (ferramenta Lighthouse do Chrome DevTools MCP + checklist manual) revelou que o projeto **não tem nenhum tratamento de acessibilidade** além de alt texts em imagens: sem skip link, sem estilos de focus visíveis, sem aria-labels em ícones/toggles/navegação, e com problemas de ordem de headings.
+
+A fase executa: **auditoria completa → correções (percebível, operável, compreensível, robusto) → re-auditoria** com meta de Lighthouse a11y ≥ 90 e checklist WCAG 2.1 AA atendido nos pontos aplicáveis.
+
+Resolve os itens de backlog: "Auditoria completa WCAG 2.1 AA", "Skip links", "Focus visible states consistentes" e a pendência da Fase 02 (8 links SVG sem nome acessível).
+
+---
+
+## Contexto Técnico Atual
+
+### Auditoria inicial (achados conhecidos)
+
+| # | Achado | Princípio WCAG | Local |
+|---|---|---|---|
+| 1 | Sem skip link | Operável (2.4.1 Bypass Blocks) | `app.html` topo |
+| 2 | **Zero** estilos `:focus`/`focus-visible` no CSS | Operável (2.4.7 Focus Visible) | `app.scss`/`styles.scss` |
+| 3 | 8 links SVG de projetos sem `aria-label`/texto (leitores anunciam "link vazio") | Percebível (1.1.1) + Nome/Valor (4.1.2) | linhas 153-242 |
+| 4 | Ícones sociais (sidebar) com `title` mas sem `aria-label`/`role="img"` | 1.1.1 / 4.1.2 | linhas 26, 31 |
+| 5 | Toggle mobile sem `aria-label`, `aria-expanded`, `aria-controls` | 4.1.2 | linhas 9, 46 |
+| 6 | `<nav>` sem `aria-label` (navegação principal não identificável) | 1.3.1 | linha 3 |
+| 7 | Ordem de headings quebrada: `h3` (logo sidebar, linha 6) antes do `h1` (hero, linha 59) | 1.3.1 Info & Relationships | linhas 6, 59 |
+| 8 | Contraste/outros: verificar via Lighthouse (ex: accent #ff6b35 sobre fundos, texto sobre imagens) | 1.4.3 | — |
+| 9 | Target size de botões/toggles (ex: toggle mobile 40px?) | 2.5.8 (AA em 2024) / 2.5.5 | — |
+| 10 | HTML/semântica: validar (ex: `<i class="material-icons">` sem `aria-hidden`) | 4.1.1 Parsing / 1.1.1 | — |
+
+### Estrutura relevante
+
+```
+portfolio/src/app/
+├── app.html      ← template (321+ linhas): nav sidebar, header mobile, hero, 6 seções
+├── app.scss      ← estilos (~1000 linhas) — SEM :focus
+├── app.spec.ts   ← 15 testes existentes
+└── styles.scss   ← tokens globais (--accent-primary: #ff6b35, --bg-primary: #020008)
+```
+
+### Ferramentas disponíveis
+
+- Lighthouse via Chrome DevTools MCP (`lighthouse_audit` com categories accessibility) — rodar em `npm start`
+- Checklist manual WCAG 2.1 AA (princípios: Percebível, Operável, Compreensível, Robusto)
+
+### Convenções
+
+- Budgets: 500kB initial / 1MB max; 25kB/30kB style
+- Lint configurado na Fase 03: `npm run lint` (inclui regras `@angular-eslint/template` de acessibilidade — o template já passa em 0 problemas, mas aria-labels novos devem continuar passando)
+- Links externos com `rel="noopener noreferrer"` (Fase 02)
+
+---
+
+## Tasks
+
+### TASK 1 — Auditoria WCAG 2.1 AA (baseline)
+
+**Objetivo:** Inventariar todos os problemas de acessibilidade do estado atual e gerar a lista de correções.
+**Escopo:** Auditoria — nenhuma alteração de código.
+
+#### Subtask 1.1 — Lighthouse a11y
+- `npm start` + `lighthouse_audit` (categories: accessibility, device desktop) → registrar score e todos os failures/notices
+
+#### Subtask 1.2 — Checklist manual WCAG 2.1 AA
+Percorrer as 4 categorias no template atual (navegação por teclado Tab/Enter/Escape no toggle, ordem de leitura, headings, contraste, target size, alt texts, labels, HTML válido) e registrar achados com referência ao critério WCAG (ex: 2.4.1, 1.4.3, 4.1.2)
+
+#### Subtask 1.3 — Documentar baseline
+- Registrar score Lighthouse inicial e lista completa de achados no documento da fase (seção "Resultado da auditoria")
+
+#### Subtask 1.4 — Validação
+- [ ] **Como confirmar que está correto?** Relatório com score Lighthouse inicial + checklist de achados por critério WCAG
+
+---
+
+### TASK 2 — Skip link (sempre visível)
+
+**Objetivo:** Bypass de blocos repetitivos (WCAG 2.4.1).
+**Escopo:** `app.html` + `app.scss`.
+
+#### Subtask 2.1 — Link "Pular para conteúdo"
+- Adicionar logo após `<body>`/`<div class="app-container">`: `<a class="skip-link" href="#main-content">Pular para conteúdo</a>`
+- **Sempre visível** (decisão do desenvolvedor) — estilo com accent, posicionado no topo; garantir que não sobreponha o layout (posicionar como primeiro item em flow ou fixed com z-index)
+
+#### Subtask 2.2 — Âncora de conteúdo
+- Adicionar `id="main-content"` ao elemento principal de conteúdo (a seção hero ou um `<main>` — avaliar semântica: se houver `<main>`, usar `id` nele; senão, adicionar `id` na primeira seção de conteúdo)
+
+#### Subtask 2.3 — Validação
+- [ ] Link visível no topo, clicável, rola/foca o conteúdo
+- [ ] `npm run lint` 0 problems; `npm run build` OK
+- [ ] **Como confirmar que está correto?** Tab no teclado → link visível → Enter → foco vai para o conteúdo principal
+
+---
+
+### TASK 3 — Focus visible consistente (customizado com accent)
+
+**Objetivo:** Indicador de foco visível e consistente (WCAG 2.4.7).
+**Escopo:** `app.scss`/`styles.scss`.
+
+#### Subtask 3.1 — Estilos globais de focus
+- `:focus-visible` → `outline: 2px solid var(--accent-primary)` + `outline-offset: 2px` (valores a validar com o design)
+- Aplicar a todos os interativos: `a`, `button`, `[tabindex]`
+- `:focus` (fallback para browsers sem suporte a :focus-visible) com o mesmo outline
+
+#### Subtask 3.2 — Verificar que nenhum interativo remove outline
+- `grep` por `outline: none`/`outline: 0` no SCSS — se houver, remover ou substituir por estilo próprio
+
+#### Subtask 3.3 — Validação
+- [ ] Tab percorre todos os elementos interativos com indicador visível em cada um
+- [ ] `npm run lint:styles` 0 problems
+- [ ] **Como confirmar que está correto?** navegação por teclado mostra outline accent em todos os focáveis (visual + screenshot)
+
+---
+
+### TASK 4 — ARIA: labels completos (projetos, sociais, toggle, nav)
+
+**Objetivo:** Nomes acessíveis para todos os controles/links sem texto (4.1.2, 1.1.1).
+**Escopo:** `app.html` apenas.
+
+#### Subtask 4.1 — Links de projetos (8)
+- Adicionar `aria-label` descritivo em cada um: ex `aria-label="Código do projeto Minha Guita no GitHub"` (GitHub) e `aria-label="Deploy do projeto Minha Guita"` (deploy)
+- Manter `target="_blank" rel="noopener noreferrer"`
+
+#### Subtask 4.2 — Ícones sociais (sidebar)
+- Substituir/`complementar` `title` por `aria-label` (ex: `aria-label="GitHub de Thales Nunes"`)
+- SVGs decorativos: `aria-hidden="true"` + `focusable="false"` nos `<svg>` que são apenas ilustração (quando o link já tem aria-label)
+
+#### Subtask 4.3 — Toggle mobile (linhas 9 e 46)
+- `aria-label="Abrir menu"` / alternar para "Fechar menu" conforme estado? (se simples: `aria-label="Menu"`)
+- `aria-expanded="false|true"` vinculado a `sidebarOpen` (binding Angular: `[attr.aria-expanded]="sidebarOpen"`)
+- `aria-controls="sidebar"` (id no `<nav>`)
+
+#### Subtask 4.4 — Navegação
+- `<nav aria-label="Navegação principal">` (ou `aria-labelledby`)
+- Botões do menu com `aria-current` quando ativo? (opcional — avaliar custo/benefício)
+- Ícones `material-icons` decorativos → `aria-hidden="true"`
+
+#### Subtask 4.5 — Validação
+- [ ] `npm run lint` 0 problems (regras template/accessibility do angular-eslint)
+- [ ] **Como confirmar que está correto?** Lighthouse a11y: ausência dos failures de "nomes acessíveis"; inspeção via DevTools (acessibility tree) mostra labels corretos
+- [ ] Testes existentes 15/15 continuam passando
+
+---
+
+### TASK 5 — Correções da auditoria (conforme achados da TASK 1)
+
+**Objetivo:** Endereçar os demais achados WCAG (headings, contraste, target size, semântica, HTML).
+**Escopo:** Conforme achados — esperado: `app.html`, `app.scss`, `styles.scss`.
+
+#### Subtask 5.1 — Ordem de headings (1.3.1)
+- Resolver `h3` (logo sidebar) antes de `h1` (hero): transformar o logo da sidebar em elemento não-heading (ex: `<p>`/`<span>` com estilos mantidos) OU reestruturar — manter aparência idêntica
+
+#### Subtask 5.2 — Demais achados da auditoria
+- Contraste (1.4.3): ajustar cores se algum par falhar (mantendo o design — ex: escurecer/clarear apenas o necessário)
+- Target size (2.5.8): aumentar hit-area de controles < 24px (ex: toggle mobile, ícones sociais) via padding/min-size sem mudar o visual
+- Ícones decorativos `aria-hidden` (ver TASK 4.4)
+- HTML inválido/semântica (4.1.1): corrigir conforme achados
+- Qualquer outro achado da TASK 1
+
+#### Subtask 5.3 — Validação
+- [ ] Checklist WCAG 2.1 AA (aplicável) marcado no documento da fase
+- [ ] `npm run lint` 0 problems; `npm run lint:styles` 0 problems; `npm run build` OK
+- [ ] **Como confirmar que está correto?** re-auditoria: Lighthouse a11y ≥ 90 e nenhum failure; testes 15/15
+
+---
+
+### TASK 6 — Testes de acessibilidade + re-auditoria final
+
+**Objetivo:** Prevenir regressão e comprovar a conformidade.
+**Escopo:** `app.spec.ts` + relatório final.
+
+#### Subtask 6.1 — Specs novos (qa)
+- Skip link presente no DOM (primeiro elemento focável)
+- Todos os `a[target="_blank"]` com `aria-label` ou texto acessível
+- Toggle tem `aria-expanded` que alterna com `sidebarOpen` (chamar `toggleSidebar()` e verificar binding)
+- Navegação `<nav>` tem `aria-label`
+
+#### Subtask 6.2 — Re-auditoria Lighthouse
+- Rodar Lighthouse a11y de novo: registrar score final (meta ≥ 90) e confirmar 0 failures
+
+#### Subtask 6.3 — Validação
+- [ ] `npm test` — todos passando (15 existentes + novos)
+- [ ] **Como confirmar que está correto?** `npm test` verde + relatório Lighthouse final anexado ao delta da fase
+
+---
+
+## Ordem de Execução
+
+```
+TASK 1 → TASK 2 → TASK 3 → TASK 4 → TASK 5 → TASK 6
+```
+
+- TASK 1: `review-portfolio` ou `frontend-portfolio` (auditoria com Lighthouse MCP)
+- TASKs 2-5: `frontend-portfolio` (implementação, com re-auditoria da TASK 5)
+- TASK 6: `qa-frontend-portfolio` (testes) + Lighthouse final
+- Revisão final: `review-portfolio`
+
+Cada task deve:
+1. Deixar build validado (`npm run build`) e lints zerados
+2. Responder "Como confirmar que está correto?" com evidência
+3. Ser commitada antes de avançar
+
+---
+
+## Arquivos Principais Afetados
+
+| Task | Arquivos |
+|------|----------|
+| 1 | — (relatório) |
+| 2 | `portfolio/src/app/app.html`, `portfolio/src/app/app.scss` |
+| 3 | `portfolio/src/app/app.scss`, `portfolio/src/styles.scss` |
+| 4 | `portfolio/src/app/app.html` |
+| 5 | `portfolio/src/app/app.html`, `app.scss`, `styles.scss` (conforme achados) |
+| 6 | `portfolio/src/app/app.spec.ts` |
+
+---
+
+## Restrições e Regras de Escopo
+
+- **Manter o design visual**: correções de contraste/target size/headings não podem mudar a aparência geral (ajustes mínimos)
+- **Não alterar** funcionalidades (navegação, scroll, toggle)
+- Lints zerados após cada task (`npm run lint`, `npm run lint:styles`)
+- Budgets respeitados (não adicionar deps novas — tudo é HTML/CSS/TS local)
+- ARIA: usar apenas onde necessário (não poluir com roles desnecessários)
+
+---
+
+## Critérios de Aceitação
+
+- [x] Skip link sempre visível, funcional (WCAG 2.4.1)
+- [x] Focus visible consistente em todos os interativos (WCAG 2.4.7)
+- [x] Nomes acessíveis: links projetos, ícones sociais, toggle (aria-expanded), nav (4.1.2/1.1.1)
+- [x] Ordem de headings corrigida (1.3.1)
+- [x] Checklist WCAG 2.1 AA (aplicável) documentado e atendido
+- [x] Lighthouse a11y **100/100** (antes: 90) — 48 passed, 0 failed
+- [x] Testes novos (6) + 15 existentes passando → **21/21**
+- [x] Lints zerados, build OK (284 kB initial), budgets OK
+- [x] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
+- [x] Revisão final (`review-portfolio`) aprovada
+
+---
+
+## Delta (Plano vs. Entrega)
+
+| Aspecto | Plano | Entrega |
+|---------|-------|---------|
+| Skip link | Sempre visível (decisão) | ✅ Igual — pill accent fixa topo-centro, z-index 2000, alvo `<main id="main-content" tabindex="-1">` |
+| Focus visible | Customizado com accent | ✅ Igual — `:focus` + `:focus-visible` outline 2px accent global |
+| ARIA | Cobertura completa | ✅ Igual + extra: `aria-controls`/`id` no nav, `focusable="false"` nos SVGs, 12 material-icons `aria-hidden` |
+| Contraste | Ajustar pares com falha | ✅ Texto `#020008` sobre accent (7.38:1 AAA) em vez de escurecer o accent (identidade preservada); sociais 6.92:1 |
+| Auditoria | WCAG 2.1 AA completa | ✅ Checklist documentado; achados novos incorporados (2.4.3 inert, overlay focus-within) |
+| Headings | Corrigir ordem | ✅ logo `h3`→`p.logo-name`; skills `h4`→`h3` (H1→H2→H3→H4) |
+
+### Entregas não previstas
+
+- **2.4.3 Focus Order (crítico, achado da auditoria)**: 10 controles focáveis invisíveis com sidebar fechada — resolvido com `[attr.inert]` (removido quando `sidebarOpen`, mantendo a tab order em mobile aberta/desktop)
+- **Overlay hover-only**: `:focus-within` no `.project-image` torna os links visíveis na navegação por Tab
+- **~135 linhas de SCSS morto removido** (`.stats`, `.tech-*`) — classes inexistentes no template; também resolveu `no-descending-specificity` disparado pelo novo `h3`
+- **Contagem corrigida**: são 6 (não 8) links de projeto sem nome acessível (auditoria precisa)
+
+### Pendências
+
+- **Hero: texto `#ccc` sobre foto panorâmica** — contraste não garantido (pré-existente, requer avaliação visual humana) → backlog
+- **Foco automático no drawer ao abrir** (APG) — deferido para não alterar `toggleSidebar()`; controles alcançáveis via Shift+Tab → backlog
+- **`:focus`/`:focus-visible` redundantes** (regras idênticas) — simplificar em refatoração futura → backlog (cosmético)
+- **Target size dos ícones sociais (40×40px)** — atende AA (24px), não AAA → ok/backlog
+- Execução real do CI pendente do incidente do GitHub Actions
+
+---
+
+## Commits principais
+
+| Commit | Descrição |
+|--------|-----------|
+| `34548a8` | docs(fase-04): create planning for WCAG 2.1 AA accessibility audit |
+| `6849cb0` | docs(fase-04): register WCAG baseline audit (Lighthouse 90, 3 failures) |
+| `7c1ca81` | feat(a11y): skip link, focus styles, ARIA labels and WCAG fixes (Lighthouse 100) |
+| `2ed8556` | test(a11y): cover skip link, accessible names, aria-expanded and nav label |
+
+---
+
+## Resultado da Auditoria (baseline)
+
+**Data:** 06/08/2026 — executada na branch `feature/fase-04-acessibilidade` antes de qualquer correção.
+
+### Método
+
+- **Ferramenta:** Lighthouse via Chrome DevTools MCP (`chrome-devtools_lighthouse_audit`, mode `navigation`, device `desktop`) + checklist manual WCAG 2.1 AA (inspeção de DOM/CSS via scripts, navegação por teclado simulada, emulação mobile e zoom 200%)
+- **URL auditada:** `http://localhost:4201/` (dev server `ng serve --port 4201` — porta 4200 ocupada por outro projeto)
+- **Servidor:** `npm start` em `portfolio/`, visual confirmado
+
+### 1. Score Lighthouse inicial (accessibility)
+
+**Score: 90/100** — Passed: 39 · Failed: 3 · Total timing: ~5.8s
+
+| Audit | Score | Weight | Falha |
+|---|---|---|---|
+| `link-name` — Links do not have a discernible name | 0 | 7 | **6 links** de projeto sem nome acessível (SVG sem texto/alt/aria-label) |
+| `heading-order` — Heading elements are not in a sequentially-descending order | 0 | 3 | `h2` (Competências) → `h4` (skill-item) pula nível; 1º heading da página é `h3` (logo sidebar) antes do `h1` |
+
+**Notices relevantes (manuais, não automatizados):**
+- `bypass`: **notApplicable** — o audit considera OK por existirem landmarks `<main>` e `<nav>`; o checklist manual ainda marca **FAIL 2.4.1** (decisão do plano: skip link sempre visível)
+- `focusable-controls`, `logical-tab-order`, `use-landmarks`, `custom-controls-labels`, `custom-controls-roles`, `interactive-element-affordance`: **manual** — pendentes de verificação (feitas no checklist abaixo)
+
+> Outras categorias: Best Practices 100 · SEO 100 (referência, sem alteração nesta fase)
+
+### 2. Checklist manual WCAG 2.1 AA
+
+| Critério | Resultado | Detalhes |
+|---|---|---|
+| **1.1.1** Non-text Content | **FAIL** | 12 `<i class="material-icons">` decorativos **sem `aria-hidden`** (anunciam "menu", "close", "developer_mode"…); SVGs dos links de projeto e sociais **sem `aria-hidden="true"`/`focusable="false"`**; imagens `<img>` OK (4 com `alt`) |
+| **1.3.1** Info & Relationships | **FAIL** | Ordem de headings quebrada: `h3` (logo sidebar) antes do `h1` (hero); `h2`→`h4` nos skills (skip de nível); `<nav>` **sem `aria-label`** (landmark não identificável) |
+| **1.4.3** Contrast (AA) | **FAIL** | **Branco sobre `#ff6b35`: 2.84:1** (botão "Ver Projetos" e ícones `.project-link`) — texto exige 4.5:1, gráfico exige 3.0:1 → **FAIL**; ícones sociais `rgba(144,131,136,.7)` sobre sidebar: **3.00:1** (marginal p/ gráfico); texto do hero sobre foto `eu-panoramico.jpg`: **risco** (foto escura parece OK, requer verificação visual humana). Pares OK: `#ff6b35`/`#020008` 7.36:1 ✓ · `#fff`/`#020008` 20.87:1 ✓ · `#ccc`/`#1a1a1a` 10.84:1 ✓ · `#ff6b35`/`#1a1a1a` 6.14:1 ✓ · `#e55a2b`/`#1a1a1a` 4.83:1 ✓ |
+| **1.4.4** Resize text | **PASS** | Zoom 200% (viewport 669px): **sem overflow horizontal** (`scrollWidth` ≤ `clientWidth`); grids colapsam corretamente; `body { overflow-x: hidden }` cobre a sidebar off-screen |
+| **2.1.1** Keyboard | **PASS** | Todos os interativos são `<button>`/`<a>` (nenhum `div` clicável; `cursor:pointer` só em links/botões) |
+| **2.4.1** Bypass Blocks | **FAIL** | **Sem skip link** (decisão do plano: implementar sempre visível) |
+| **2.4.3** Focus Order | **FAIL** ⚠️ **novo** | **Sidebar fechada deixa 10 controles focáveis fora da viewport** (`left: -280px`): 1º Tab foca em "Home" invisível (desktop) / `sidebar-toggle` invisível (mobile); usuário de teclado "perde" o foco até chegar no `.menu-toggle` (11º tab). Grave |
+| **2.4.7** Focus Visible | **FAIL** | **Zero estilos `:focus`/`:focus-visible` no SCSS** (grep confirmou: nenhum `outline`/`:focus`); browser default aparece (outline azul 3px em teclado), mas sem consistência com o design e foco cai em elementos off-screen (ver 2.4.3) |
+| **2.5.8** Target Size (AA 24px) | **PASS** | Todos ≥ 24px: nav 279×50 · sociais 40×40 · toggles 40×40 · hero btns 195/239×52 · project-links 50×50 · contatos 200-220×92. Obs.: 2.5.5 (AAA 44px) falharia em toggles/sociais (40px) — não requerido para AA |
+| **4.1.1** Parsing | **PASS** | `lang="pt-BR"` ✓ · meta viewport sem bloqueio de zoom ✓ · HTML bem formado (doctype, base, charset) ✓ · `<i>` usados apenas para ícones de fonte (não corrompem parsing) |
+| **4.1.2** Name/Value | **FAIL** | **Toggles sem nome/estado**: `aria-label`, `aria-expanded`, `aria-controls` ausentes nos 2 toggles (nome acessível atual = "menu close", concatenado dos ligatures); **6 links de projeto sem nome**; sociais com `title` apenas (nome presente mas subótimo — sem `aria-label`/`role="img"`); `<nav>` sem nome de landmark |
+
+**Contagem: 4 PASS · 7 FAIL · 0 NA**
+
+### 3. Achados além dos 10 conhecidos do plano
+
+| # | Achado novo | Critério | Severidade |
+|---|---|---|---|
+| 11 | **Sidebar off-screen focável** — 10 controles invisíveis na tab order antes do menu-toggle (desktop e mobile) | 2.4.3 | Crítica (bloqueia navegação por teclado) |
+| 12 | **Overlay de projetos hover-only** — links do overlay com `opacity: 0` alcançáveis por Tab mas sem affordance visual (interactive-element-affordance manual) | 2.4.7 / manual | Média |
+| 13 | Correção de contagem: são **6 links de projeto** sem nome (não 8 como constava no plano) | 4.1.2 | Informativa |
+| 14 | Contraste dos ícones sociais `rgba(144,131,136,.7)` em **3.00:1** (marginal para gráficos) | 1.4.3 | Média |
+| 15 | Contraste **branco sobre `#ff6b35` = 2.84:1** no botão primário do hero e nos `.project-link` (não estava quantificado no plano) | 1.4.3 | Alta |
+
+### 4. Lista priorizada de correções (cobertura TASKs 2-5)
+
+| Prioridade | Correção | Critério | Task |
+|---|---|---|---|
+| 🔴 Crítica | Impedir foco nos controles da sidebar quando fechada (`aria-hidden` + `visibility:hidden`/`inert` no estado fechado, ou equivalente) — **achado 11** | 2.4.3 | 5 |
+| 🔴 Alta | `aria-label` + `aria-expanded` + `aria-controls` nos 2 toggles; nome acessível correto (hoje "menu close") | 4.1.2 | 4 |
+| 🔴 Alta | `aria-label` nos 6 links de projeto + `aria-hidden="true"`/`focusable="false"` nos SVGs | 1.1.1/4.1.2 | 4 |
+| 🔴 Alta | `aria-label` nos links sociais (substituir/complementar `title`) e `<nav aria-label="Navegação principal">` | 1.1.1/4.1.2/1.3.1 | 4 |
+| 🟠 Alta | Skip link sempre visível + `id="main-content"` | 2.4.1 | 2 |
+| 🟠 Alta | Focus visible customizado com accent (`:focus-visible` + fallback `:focus`; remover qualquer `outline:none`) — validar interação com overlay hover-only (**achados 2, 12**) | 2.4.7 | 3 |
+| 🟠 Média | Ordem de headings: logo sidebar `h3`→`span`/`p`; `h4` de skills→`h3` (ou reestruturar `h2`→`h3`→`h4`) | 1.3.1 | 5 |
+| 🟠 Média | Contraste: branco sobre `#ff6b35` 2.84:1 (btn primário hero + `.project-link`) — escurecer accent (~`#cf4d1f`) ou texto escuro; ícones sociais subir opacidade ≥ 4.5:1 | 1.4.3 | 5 |
+| 🟡 Baixa | `aria-hidden="true"` nos 12 ícones material-icons decorativos | 1.1.1 | 4/5 |
+| 🟡 Baixa | Target size: manter ≥ 24px (já OK); avaliar 44px em toggles/sociais se desejado | 2.5.8/2.5.5 | 5 |
+| 📝 Verificar | Contraste do texto do hero sobre a foto `eu-panoramico.jpg` (verificação visual humana após correções) | 1.4.3 | 5 |
+
+**Legenda:** 🔴 bloqueante/alta · 🟠 média · 🟡 baixa · 📝 verificação manual
+
+### Evidências
+
+- Relatório Lighthouse JSON/HTML: `/tmp/opencode/lighthouse-baseline/report.{json,html}` (fora do repo)
+- Screenshot hero desktop: `/tmp/opencode/lighthouse-baseline/hero-desktop.png` (fora do repo)
+- Dados de DOM/CSS coletados via `chrome-devtools_evaluate_script` (getComputedStyle/getBoundingClientRect): focusables 22 (18 fora da viewport no 1º Tab), headings 23, contrastes calculados via WCAG fórmula
+
+---
+
+## TASKs 2-5 — Implementação (delta)
+
+**Data:** 06/08/2026 — `frontend-portfolio` na branch `feature/fase-04-acessibilidade`.
+
+### Mudanças por arquivo
+
+| Arquivo | Mudanças |
+|---|---|
+| `app.html` | Skip link logo após `.app-container`; `<nav id="sidebar" aria-label="Navegação principal" [attr.inert]>`; logo `h3`→`<p class="logo-name">`; `aria-label`+`aria-expanded`+`aria-controls` nos 2 toggles; `aria-label` nos 3 links sociais (substituindo `title`) e nos 6 links de projeto; `aria-hidden="true"`+`focusable="false"` nos 9 SVGs; `aria-hidden="true"` nos 12 `material-icons`; `<main id="main-content" tabindex="-1">`; skills `h4`→`h3` |
+| `app.scss` | `.skip-link` sempre visível (pill accent fixa no topo, z-index 2000, hover/focus); seletor do logo `h3`→`.logo-name`; `.social-links a` `rgb(144 131 136 / 70%)`→`rgb(168 158 162)` sólido; `.btn-primary` e `.project-link` `color: white`→`var(--bg-primary)`; `.skill-item h4`→`h3`; overlay de projetos ganhou `&:focus-within` (visível no Tab); **removidos ~135 linhas de código morto** (`.tech-categories/.tech-category/.tech-items/.tech-item` e `.stats/.stat-item` — nenhuma classe existe no template) |
+| `styles.scss` | `:focus` e `:focus-visible` com `outline: 2px solid var(--accent-primary)` + `outline-offset: 2px` (universal — cobre `a`, `button`, `[tabindex]` e derivados); `#main-content:focus { outline: none }` (target do skip link é landmark não-interativo) |
+
+### Decisões técnicas
+
+1. **2.4.3 Focus order — `inert` (não `tabindex` dinâmico)**: `[attr.inert]="sidebarOpen ? null : ''"` no `<nav>`. Verificado no browser que **a sidebar fica off-screen em TODAS as viewports quando fechada** (`left: -280px`; não existe media query de "sidebar sempre visível" no desktop — a suposição do plano estava incorreta; no desktop o 1º Tab caía no "Home" invisível, conforme audit). `inert` remove os 10 controles da tab order E da árvore de acessibilidade nativamente (suporte universal desde 2023), é testável e não exige manipulação de DOM. Sem `tabindex` dinâmico: mais código, risco de inconsistência entre estado e atributos.
+2. **Contraste 1.4.3 — texto escuro sobre accent (mantém identidade)**: em vez de escurecer `--accent-primary` (mudaria a cor da marca), `.btn-primary` e `.project-link` passam a usar `color: var(--bg-primary)` (`#020008`) sobre `#ff6b35` → **7.36:1** (hover `#e55a2b` → 5.79:1). Consistente com o `.btn-primary` do `styles.scss` (já usava texto escuro). Ícones sociais: `rgb(168 158 162)` sólido → **6.76:1** sobre o sidebar (era 3.00:1 com 70% de opacidade).
+3. **Skip link sempre visível**: pill fixa no topo-centro (`left: 50%`), não sobrepõe o `.menu-toggle` (que fica à esquerda). Contraste 7.36:1.
+4. **Headings**: logo da sidebar `h3`→`<p>` (não-heading com estilo mantido); skills `h4`→`h3` (agora `H2 → H3` sem pulo). Experiência mantém `h3` (cargo) → `h4` (empresa), sequencial.
+5. **Overlay hover-only**: `:focus-within` no `.project-image` mostra o overlay quando um `.project-link` recebe foco via Tab (achado 12).
+6. **Focus outline**: outline accent funciona no tema escuro (6.14:1 sobre `#1a1a1a`, 7.36:1 sobre `#020008`) — outline é desenhado FORA do elemento, nunca sobre o próprio botão laranja, então não há conflito com fundos accent. Único `outline: none` é intencional e não-interativo (`#main-content`).
+7. **Fora de escopo (documentado)**: ao abrir o drawer, o foco NÃO é movido automaticamente para o 1º item (APG recomenda, mas muda o comportamento do `toggleSidebar()` — proibido pela regra "não alterar funcionalidades"; os controles ficam alcançáveis via Shift+Tab). Candidato a follow-up com os testes da TASK 6.
+
+### Re-auditoria (Lighthouse a11y, desktop, `http://127.0.0.1:4201/`)
+
+**Antes: 90/100** (3 failures: `link-name` 6 links, `heading-order`) → **Depois: 100/100** (48 passed · 0 failed). Demais categorias mantidas em 100 (Best Practices, SEO).
+
+### Validação executada
+
+| Comando | Resultado |
+|---|---|
+| `npm run lint` | 0 problems |
+| `npm run lint:styles` | 0 problems |
+| `npm run typecheck` | exit 0 |
+| `npm test` | 15/15 SUCCESS |
+| `npm run build` | OK — initial 284.47 kB (budget 500 kB), styles 14.28 kB (budget 25 kB) |
+
+### Verificação manual (browser, DevTools MCP)
+
+- 1º Tab → skip link (visível, outline accent) → 2º Tab → `.menu-toggle` (sidebar inert pulada) → botões do hero → project-links → contatos. Nenhum controle off-screen na tab order (desktop 1440px e mobile 375px).
+- Skip link: Enter move foco para `<main id="main-content">` (sem ring gigante).
+- Toggle: `aria-expanded` alterna `false`↔`true`, `aria-label` alterna "Abrir menu"↔"Fechar menu", `inert` removido ao abrir (controles da sidebar focáveis/relevados na a11y tree).
+- Overlay dos projetos: visível (`opacity: 1`) ao Tab nos `.project-link`.
+- Headings sequenciais: H1 → H2 → H3 → H4, sem pulos; logo da sidebar não é mais heading.
+- A11y tree: 6 links de projeto nomeados, 3 sociais nomeados, 12 ícones e 9 SVGs ocultos, nav landmark "Navegação principal".
+
+### Achados do plano NÃO endereçados (por quê)
+
+- **Foco automático no drawer ao abrir** (APG drawer pattern): deferido — alteraria `toggleSidebar()` (regra de não mudar funcionalidades) e os testes são da TASK 6/QA.
+- **Contraste do texto do hero sobre a foto `eu-panoramico.jpg`** (📝 verificação manual): requer olho humano; nada mudou no hero além do botão primário.
+- **Target size 44px (2.5.5 AAA)**: não requerido para AA (2.5.8 já passa — todos ≥ 24px).
