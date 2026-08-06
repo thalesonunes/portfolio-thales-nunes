@@ -240,3 +240,82 @@ Cada task deve:
 - [ ] Lints zerados, build OK, budgets OK
 - [ ] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
 - [ ] Revisão final (`review-portfolio`) aprovada
+
+---
+
+## Resultado da Auditoria (baseline)
+
+**Data:** 06/08/2026 — executada na branch `feature/fase-04-acessibilidade` antes de qualquer correção.
+
+### Método
+
+- **Ferramenta:** Lighthouse via Chrome DevTools MCP (`chrome-devtools_lighthouse_audit`, mode `navigation`, device `desktop`) + checklist manual WCAG 2.1 AA (inspeção de DOM/CSS via scripts, navegação por teclado simulada, emulação mobile e zoom 200%)
+- **URL auditada:** `http://localhost:4201/` (dev server `ng serve --port 4201` — porta 4200 ocupada por outro projeto)
+- **Servidor:** `npm start` em `portfolio/`, visual confirmado
+
+### 1. Score Lighthouse inicial (accessibility)
+
+**Score: 90/100** — Passed: 39 · Failed: 3 · Total timing: ~5.8s
+
+| Audit | Score | Weight | Falha |
+|---|---|---|---|
+| `link-name` — Links do not have a discernible name | 0 | 7 | **6 links** de projeto sem nome acessível (SVG sem texto/alt/aria-label) |
+| `heading-order` — Heading elements are not in a sequentially-descending order | 0 | 3 | `h2` (Competências) → `h4` (skill-item) pula nível; 1º heading da página é `h3` (logo sidebar) antes do `h1` |
+
+**Notices relevantes (manuais, não automatizados):**
+- `bypass`: **notApplicable** — o audit considera OK por existirem landmarks `<main>` e `<nav>`; o checklist manual ainda marca **FAIL 2.4.1** (decisão do plano: skip link sempre visível)
+- `focusable-controls`, `logical-tab-order`, `use-landmarks`, `custom-controls-labels`, `custom-controls-roles`, `interactive-element-affordance`: **manual** — pendentes de verificação (feitas no checklist abaixo)
+
+> Outras categorias: Best Practices 100 · SEO 100 (referência, sem alteração nesta fase)
+
+### 2. Checklist manual WCAG 2.1 AA
+
+| Critério | Resultado | Detalhes |
+|---|---|---|
+| **1.1.1** Non-text Content | **FAIL** | 12 `<i class="material-icons">` decorativos **sem `aria-hidden`** (anunciam "menu", "close", "developer_mode"…); SVGs dos links de projeto e sociais **sem `aria-hidden="true"`/`focusable="false"`**; imagens `<img>` OK (4 com `alt`) |
+| **1.3.1** Info & Relationships | **FAIL** | Ordem de headings quebrada: `h3` (logo sidebar) antes do `h1` (hero); `h2`→`h4` nos skills (skip de nível); `<nav>` **sem `aria-label`** (landmark não identificável) |
+| **1.4.3** Contrast (AA) | **FAIL** | **Branco sobre `#ff6b35`: 2.84:1** (botão "Ver Projetos" e ícones `.project-link`) — texto exige 4.5:1, gráfico exige 3.0:1 → **FAIL**; ícones sociais `rgba(144,131,136,.7)` sobre sidebar: **3.00:1** (marginal p/ gráfico); texto do hero sobre foto `eu-panoramico.jpg`: **risco** (foto escura parece OK, requer verificação visual humana). Pares OK: `#ff6b35`/`#020008` 7.36:1 ✓ · `#fff`/`#020008` 20.87:1 ✓ · `#ccc`/`#1a1a1a` 10.84:1 ✓ · `#ff6b35`/`#1a1a1a` 6.14:1 ✓ · `#e55a2b`/`#1a1a1a` 4.83:1 ✓ |
+| **1.4.4** Resize text | **PASS** | Zoom 200% (viewport 669px): **sem overflow horizontal** (`scrollWidth` ≤ `clientWidth`); grids colapsam corretamente; `body { overflow-x: hidden }` cobre a sidebar off-screen |
+| **2.1.1** Keyboard | **PASS** | Todos os interativos são `<button>`/`<a>` (nenhum `div` clicável; `cursor:pointer` só em links/botões) |
+| **2.4.1** Bypass Blocks | **FAIL** | **Sem skip link** (decisão do plano: implementar sempre visível) |
+| **2.4.3** Focus Order | **FAIL** ⚠️ **novo** | **Sidebar fechada deixa 10 controles focáveis fora da viewport** (`left: -280px`): 1º Tab foca em "Home" invisível (desktop) / `sidebar-toggle` invisível (mobile); usuário de teclado "perde" o foco até chegar no `.menu-toggle` (11º tab). Grave |
+| **2.4.7** Focus Visible | **FAIL** | **Zero estilos `:focus`/`:focus-visible` no SCSS** (grep confirmou: nenhum `outline`/`:focus`); browser default aparece (outline azul 3px em teclado), mas sem consistência com o design e foco cai em elementos off-screen (ver 2.4.3) |
+| **2.5.8** Target Size (AA 24px) | **PASS** | Todos ≥ 24px: nav 279×50 · sociais 40×40 · toggles 40×40 · hero btns 195/239×52 · project-links 50×50 · contatos 200-220×92. Obs.: 2.5.5 (AAA 44px) falharia em toggles/sociais (40px) — não requerido para AA |
+| **4.1.1** Parsing | **PASS** | `lang="pt-BR"` ✓ · meta viewport sem bloqueio de zoom ✓ · HTML bem formado (doctype, base, charset) ✓ · `<i>` usados apenas para ícones de fonte (não corrompem parsing) |
+| **4.1.2** Name/Value | **FAIL** | **Toggles sem nome/estado**: `aria-label`, `aria-expanded`, `aria-controls` ausentes nos 2 toggles (nome acessível atual = "menu close", concatenado dos ligatures); **6 links de projeto sem nome**; sociais com `title` apenas (nome presente mas subótimo — sem `aria-label`/`role="img"`); `<nav>` sem nome de landmark |
+
+**Contagem: 4 PASS · 7 FAIL · 0 NA**
+
+### 3. Achados além dos 10 conhecidos do plano
+
+| # | Achado novo | Critério | Severidade |
+|---|---|---|---|
+| 11 | **Sidebar off-screen focável** — 10 controles invisíveis na tab order antes do menu-toggle (desktop e mobile) | 2.4.3 | Crítica (bloqueia navegação por teclado) |
+| 12 | **Overlay de projetos hover-only** — links do overlay com `opacity: 0` alcançáveis por Tab mas sem affordance visual (interactive-element-affordance manual) | 2.4.7 / manual | Média |
+| 13 | Correção de contagem: são **6 links de projeto** sem nome (não 8 como constava no plano) | 4.1.2 | Informativa |
+| 14 | Contraste dos ícones sociais `rgba(144,131,136,.7)` em **3.00:1** (marginal para gráficos) | 1.4.3 | Média |
+| 15 | Contraste **branco sobre `#ff6b35` = 2.84:1** no botão primário do hero e nos `.project-link` (não estava quantificado no plano) | 1.4.3 | Alta |
+
+### 4. Lista priorizada de correções (cobertura TASKs 2-5)
+
+| Prioridade | Correção | Critério | Task |
+|---|---|---|---|
+| 🔴 Crítica | Impedir foco nos controles da sidebar quando fechada (`aria-hidden` + `visibility:hidden`/`inert` no estado fechado, ou equivalente) — **achado 11** | 2.4.3 | 5 |
+| 🔴 Alta | `aria-label` + `aria-expanded` + `aria-controls` nos 2 toggles; nome acessível correto (hoje "menu close") | 4.1.2 | 4 |
+| 🔴 Alta | `aria-label` nos 6 links de projeto + `aria-hidden="true"`/`focusable="false"` nos SVGs | 1.1.1/4.1.2 | 4 |
+| 🔴 Alta | `aria-label` nos links sociais (substituir/complementar `title`) e `<nav aria-label="Navegação principal">` | 1.1.1/4.1.2/1.3.1 | 4 |
+| 🟠 Alta | Skip link sempre visível + `id="main-content"` | 2.4.1 | 2 |
+| 🟠 Alta | Focus visible customizado com accent (`:focus-visible` + fallback `:focus`; remover qualquer `outline:none`) — validar interação com overlay hover-only (**achados 2, 12**) | 2.4.7 | 3 |
+| 🟠 Média | Ordem de headings: logo sidebar `h3`→`span`/`p`; `h4` de skills→`h3` (ou reestruturar `h2`→`h3`→`h4`) | 1.3.1 | 5 |
+| 🟠 Média | Contraste: branco sobre `#ff6b35` 2.84:1 (btn primário hero + `.project-link`) — escurecer accent (~`#cf4d1f`) ou texto escuro; ícones sociais subir opacidade ≥ 4.5:1 | 1.4.3 | 5 |
+| 🟡 Baixa | `aria-hidden="true"` nos 12 ícones material-icons decorativos | 1.1.1 | 4/5 |
+| 🟡 Baixa | Target size: manter ≥ 24px (já OK); avaliar 44px em toggles/sociais se desejado | 2.5.8/2.5.5 | 5 |
+| 📝 Verificar | Contraste do texto do hero sobre a foto `eu-panoramico.jpg` (verificação visual humana após correções) | 1.4.3 | 5 |
+
+**Legenda:** 🔴 bloqueante/alta · 🟠 média · 🟡 baixa · 📝 verificação manual
+
+### Evidências
+
+- Relatório Lighthouse JSON/HTML: `/tmp/opencode/lighthouse-baseline/report.{json,html}` (fora do repo)
+- Screenshot hero desktop: `/tmp/opencode/lighthouse-baseline/hero-desktop.png` (fora do repo)
+- Dados de DOM/CSS coletados via `chrome-devtools_evaluate_script` (getComputedStyle/getBoundingClientRect): focusables 22 (18 fora da viewport no 1º Tab), headings 23, contrastes calculados via WCAG fórmula
