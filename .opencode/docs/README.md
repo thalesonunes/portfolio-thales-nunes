@@ -8,7 +8,7 @@
 
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
-|    |              |        |           |
+| 02 | Correção segurança/SEO: rel noopener, favicon e typo SVG | 📋 Planejada | `fase-02-links-noopener-e-favicon.md` |
 
 ---
 
