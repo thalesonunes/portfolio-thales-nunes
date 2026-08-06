@@ -1,7 +1,7 @@
 # Fase 02 — Correção de segurança/SEO: rel noopener, favicon completo e typo SVG
 
 **Branch:** `feature/fase-02-links-noopener-e-favicon`
-**Status:** 📋 Planejada
+**Status:** ✅ Concluída
 
 ---
 
@@ -172,12 +172,42 @@ Cada task deve:
 
 ## Critérios de Aceitação
 
-- [ ] 10/10 links externos com `rel="noopener noreferrer"`
-- [ ] 0 ocorrências de `1.30` nos SVGs (paths alinhados com a sidebar)
-- [ ] `apple-touch-icon.png`, `manifest.webmanifest`, `theme-color` presentes e válidos
-- [ ] Meta `og:description` corrigida (HTML válido no `<head>`)
-- [ ] Teste de regressão de `rel` adicionado e passando
-- [ ] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
-- [ ] Testes passando: `npm test`
-- [ ] Build sem erros: `npm run build`
-- [ ] Revisão final (`review-portfolio`) aprovada
+- [x] 10/10 links externos com `rel="noopener noreferrer"`
+- [x] 0 ocorrências de `1.30` nos SVGs (paths alinhados com a sidebar)
+- [x] `apple-touch-icon.png`, `manifest.webmanifest`, `theme-color` presentes e válidos
+- [x] Meta `og:description` corrigida (HTML válido no `<head>`)
+- [x] Teste de regressão de `rel` adicionado e passando
+- [x] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
+- [x] Testes passando: `npm test` (15/15)
+- [x] Build sem erros: `npm run build` (286.49 kB initial, budgets OK)
+- [x] Revisão final (`review-portfolio`) aprovada
+
+---
+
+## Delta (Plano vs. Entrega)
+
+| Aspecto | Plano | Entrega |
+|---------|-------|---------|
+| Links externos | 10 links com rel | ✅ Igual — 10/10 com `rel="noopener noreferrer"` |
+| Typo SVG | Alinhar 4 paths com a sidebar | ✅ Igual — `3.297-1.30` → `3.297-1.23` (5 ocorrências do padrão correto) |
+| Favicon | apple-touch-icon + manifest + theme-color | ✅ Igual + **extra:** favicon-16x16.png e favicon-32x32.png gerados dos frames nativos do .ico |
+| Testes | 1 teste de regressão de rel | ✅ 2 testes (rel nos externos + mailto sem target) — 15/15 total |
+
+### Entregas não previstas
+
+- Corrigido bug pré-existente no `index.html`: `<meta property="og:description">` sem fechamento (`>` → `/>`) que engolia as metas sociais seguintes (regra do escoteiro)
+- favicon-16x16/32x32 extras gerados (frames nativos do .ico)
+
+### Pendências
+
+- **Acessibilidade:** 8 links SVG de overlay dos projetos sem nome acessível (sem `aria-label`/`title`) — leitores de tela anunciam "link vazio" → **backlog** (pré-existente, fase futura de a11y)
+
+---
+
+## Commits principais
+
+| Commit | Descrição |
+|--------|-----------|
+| `fee1a13` | docs(fase-02): create planning for rel noopener, favicon set and SVG typo fix |
+| `e1a0443` | fix(security): add rel noopener to external links, complete favicon set and fix SVG paths |
+| `ab9eb7d` | test(security): add regression for rel noopener noreferrer on external links |

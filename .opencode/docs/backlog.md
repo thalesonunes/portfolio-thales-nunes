@@ -39,10 +39,8 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] **Preview das PRs no Vercel falhando (`ng: command not found`)** — a integração Vercel for GitHub roda o build na **raiz** do repo (sem `angular.json`/`ng`); só o GitHub Actions (`working-directory: ./portfolio`) deploya com sucesso. Correção: criar `vercel.json` na raiz com `{"rootDirectory": "portfolio"}` OU configurar Root Directory = `portfolio` no dashboard do projeto Vercel. Produção não é afetada (deploy via CI funciona). Identificado na revisão da Fase 01.
 - [ ] `app.scss` crescer demais → considerar split por seção
 - [ ] Verificar budgets de produção no CI
-- [ ] Favicon set completo (apple-touch-icon, manifest, etc.)
-- [ ] Links externos sem `rel="noopener noreferrer"` (10 links: sidebar, projetos, contato) — risco `window.opener` (identificado na revisão da Fase 01)
+- [ ] 8 links SVG de overlay dos projetos sem nome acessível (sem `aria-label`/`title`) — leitores de tela anunciam "link vazio" (identificado na revisão da Fase 02)
 - [ ] Aviso `baseline-browser-mapping` desatualizado no build/test (corrigir com `npm i baseline-browser-mapping@latest -D`)
-- [ ] SVGs dos ícones GitHub com typo nos paths (`1.30` vs `1.23`) — renderização ok, texto divergente do original
 - [ ] `AppComponent` sem `ChangeDetection.OnPush` (melhoria de performance)
 
 ---
@@ -55,6 +53,9 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [x] SCSS com design tokens básicos
 - [x] Responsivo mobile-first
 - [x] Cálculo automático de experiência (Fase 01)
+- [x] Links externos com `rel="noopener noreferrer"` + teste de regressão (Fase 02)
+- [x] Favicon set completo: apple-touch-icon, manifest.webmanifest, theme-color (Fase 02)
+- [x] Typo corrigido nos SVGs do ícone GitHub (`1.30` → `1.23`) (Fase 02)
 
 ---
 
