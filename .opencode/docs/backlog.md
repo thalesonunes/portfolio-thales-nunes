@@ -18,7 +18,7 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] Blog/artigos section (MDX ou CMS headless)
 - [ ] Internacionalização (pt/en)
 - [ ] Analytics privativo (Plausible/Umami)
-- [ ] **Cálculo automático de experiência** — hoje a Hero Section (app.html) tem o texto fixo "Engenheiro de Software com aproximadamente 3 anos de experiência...". O valor deve ser calculado automaticamente: transição de carreira para tecnologia em **janeiro de 2022**; exibir anos e meses dinâmicos (ex: "4 anos e 7 meses") com base na data atual, atualizando sozinho sem edição manual. Decisão pendente: calcular no `AppComponent` (TS, data do servidor) vs. estático no build.
+- [x] **Cálculo automático de experiência** — ✅ entregue na Fase 01: texto fixo "3 anos" substituído por valor dinâmico no `AppComponent` (TS, data de início jan/2022), exibindo "X anos e Y meses" com singular/plural e casos de borda. Testado (13 testes) e revisado.
 
 ### Técnico
 - [ ] E2E tests com Playwright/Cypress
@@ -39,6 +39,10 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] `app.scss` crescer demais → considerar split por seção
 - [ ] Verificar budgets de produção no CI
 - [ ] Favicon set completo (apple-touch-icon, manifest, etc.)
+- [ ] Links externos sem `rel="noopener noreferrer"` (10 links: sidebar, projetos, contato) — risco `window.opener` (identificado na revisão da Fase 01)
+- [ ] Aviso `baseline-browser-mapping` desatualizado no build/test (corrigir com `npm i baseline-browser-mapping@latest -D`)
+- [ ] SVGs dos ícones GitHub com typo nos paths (`1.30` vs `1.23`) — renderização ok, texto divergente do original
+- [ ] `AppComponent` sem `ChangeDetection.OnPush` (melhoria de performance)
 
 ---
 
@@ -49,6 +53,7 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [x] Deploy automático Vercel + GitHub Actions
 - [x] SCSS com design tokens básicos
 - [x] Responsivo mobile-first
+- [x] Cálculo automático de experiência (Fase 01)
 
 ---
 

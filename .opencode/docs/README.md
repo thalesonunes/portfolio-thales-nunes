@@ -8,7 +8,7 @@
 
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
-| 01 | Cálculo automático de experiência (Sobre Mim) | 📋 Planejada | `fase-01-calculo-experiencia.md` |
+|    |              |        |           |
 
 ---
 
@@ -16,7 +16,7 @@
 
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
-|    |              |        |           |
+| 01 | Cálculo automático de experiência (Sobre Mim) | ✅ Concluída | `fase-01-calculo-experiencia.md` |
 
 ---
 

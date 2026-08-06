@@ -1,7 +1,7 @@
 # Fase 01 — Cálculo automático de experiência (Sobre Mim)
 
 **Branch:** `feature/fase-01-calculo-experiencia`
-**Status:** 📋 Planejada
+**Status:** ✅ Concluída
 
 ---
 
@@ -133,10 +133,43 @@ Cada task deve:
 
 ## Critérios de Aceitação
 
-- [ ] Texto da seção Sobre Mim exibe "aproximadamente 4 anos e 7 meses de experiência" em ago/2026, sem edição manual
-- [ ] Casos de borda tratados: meses = 0, anos = 0, singular ("1 ano", "1 mês")
-- [ ] Demais seções e funcionalidades intactas
-- [ ] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
-- [ ] Testes passando: `npm test`
-- [ ] Build sem erros: `npm run build`
-- [ ] Revisão final (`review-portfolio`) aprovada
+- [x] Texto da seção Sobre Mim exibe "aproximadamente 4 anos e 7 meses de experiência" em ago/2026, sem edição manual
+- [x] Casos de borda tratados: meses = 0, anos = 0, singular ("1 ano", "1 mês")
+- [x] Demais seções e funcionalidades intactas
+- [x] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
+- [x] Testes passando: `npm test` (13/13)
+- [x] Build sem erros: `npm run build` (286.93 kB initial, budgets OK)
+- [x] Revisão final (`review-portfolio`) aprovada
+
+---
+
+## Delta (Plano vs. Entrega)
+
+| Aspecto | Plano | Entrega |
+|---------|-------|---------|
+| Cálculo | TS no AppComponent, data de início jan/2022 | ✅ Igual — `careerStartDate` + `experienceText` readonly calculado 1x |
+| Formato do texto | "X anos e Y meses" com singular/plural | ✅ Igual — casos de borda cobertos (meses=0, anos=0, "1 ano", "1 mês") |
+| Template | Interpolação na linha 85 mantendo "aproximadamente" | ✅ Igual — única linha alterada |
+| Testes | Cobertura do cálculo e renderização | ✅ 11 testes novos (13 total) + mock de `Date` via factory/Reflect.construct (jasmine.clock() descartado por conflitar com zone.js) |
+
+### Entregas não previstas
+
+- Correção de testes pré-existentes quebrados no `app.spec.ts`: import inexistente `App` → `AppComponent`; teste "should render title" esperava "Hello, portfolio" (template real tem "Thales Nunes") — regra do escoteiro
+- Newline final adicionada ao `app.ts` (arquivo sem `\n` final)
+
+### Pendências
+
+- 10 links com `target="_blank"` sem `rel="noopener noreferrer"` (sidebar, projetos, contato) → **backlog** (vulnerabilidade `window.opener`, pré-existente)
+- Aviso `baseline-browser-mapping` desatualizado no build/test → **backlog** (cosmético)
+- SVG dos ícones GitHub com typo nos paths (`1.30` vs `1.23`) → **backlog** (pré-existente, renderização idêntica)
+- `AppComponent` sem `ChangeDetection.OnPush` → **backlog** (melhoria de performance futura)
+
+---
+
+## Commits principais
+
+| Commit | Descrição |
+|--------|-----------|
+| `300288e` | docs(fase-01): create planning for automatic experience calculation |
+| `9ed5b05` | feat(about): dynamic experience calculation since January 2022 |
+| `b1ac069` | test(about): cover dynamic experience calculation and rendering |
