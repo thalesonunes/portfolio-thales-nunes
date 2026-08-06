@@ -11,7 +11,7 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] Animações de entrada mais suaves (IntersectionObserver)
 - [ ] Micro-interações nos cards de projetos (hover/tap)
 - [ ] Otimização de imagens (WebP, srcset, lazy loading nativo)
-- [ ] **Revisão completa do layout mobile** — auditar todas as seções (Hero, Sobre, Competências, Projetos, Experiência, Contato) em diversos tamanhos de tela (ex: 320px, 375px, 768px, 1024px) usando o Playwright MCP (browser_navigate + browser_take_screenshot). Verificar: overflow horizontal, sidebar/toggle mobile, timeline da experiência, grid de competências, cards de projetos, hierarquia tipográfica e touch targets. Critérios: sem scroll horizontal, sem conteúdo cortado, alinhamento consistente.
+- [x] **Revisão completa do layout mobile** — ✅ entregue na Fase 05: auditoria em 6 viewports (320-1440px), 0 overflow horizontal (medição objetiva), timeline corrigida (mobile + 1024px), skip-link sem colisão, tipografia refinada em ≤768px. Lighthouse a11y mantido 100/100, 28 testes
 
 ### Funcionalidades
 - [ ] Formulário de contato funcional (Supabase/emailjs)

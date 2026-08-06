@@ -520,3 +520,41 @@ Todos os critérios do backlog foram atendidos:
 - Orçamentos respeitados (286 kB de 500 kB)
 - Skip-link: padrão hidden-until-focus (WCAG C37), documentado, funcional e a11y-compliant
 - Regra do Escoteiro aplicada: `overflow-x` documentado como salvaguarda, mixin `timeline-stacked` DRY, comentários de justificativa em todas as mudanças
+
+---
+
+## Delta (Plano vs. Entrega)
+
+| Aspecto | Plano | Entrega |
+|---------|-------|---------|
+| Auditoria | Playwright MCP, 6 viewports | ✅ Igual — Playwright (browser_run_code_unsafe) + medições objetivas via evaluate; overflow exposto via JS sem tocar o arquivo |
+| Correções P0 | Timeline mobile, grid 380px, overflow-x | ✅ Todas — mixin `timeline-stacked` (≤768), `minmax(min(100%, 380px), 1fr)`, `overflow-x` justificado como salvaguarda |
+| Correções P1 | Timeline 1024, skip-link | ✅ Ambas — `position: static` 769-1024; skip-link hidden-until-focus (mudança de decisão vs Fase 04, documentada, técnica C37) |
+| Tipografia | Refinamento ≤768 | ✅ clamps (section-title, hero name), h3 timeline, contact items |
+| Testes | Specs responsivos | ✅ 7 novos — window.resizeTo(320) real funcionou no Karma (não fallback) — 28/28 |
+| Review do plano (TASK 0) | Antes da implementação | ✅ Realizado — 6 ajustes incorporados (riscos P0: overflow-x mask, minmax 380px; técnicas de medição) |
+
+### Entregas não previstas
+
+- `min-width: 0` em `.skill-item` e `.timeline-item` (achado novo: min-content das grids estourava o doc)
+- Mixin `timeline-stacked` unifica mobile+tablet (DRY, cobre o gap do 768px)
+- Skip-link: mudança de decisão "sempre visível" → "hidden-until-focus" (colisão z-index com menu-toggle em 320px)
+
+### Pendências
+
+- **P2 estético**: skip-link `:focus` fica ~11px acima do topo (54px visíveis, funcional) — ajuste opcional de `top` → backlog (cosmético)
+- **`scrollToSection` hardcoded `<= 768`** (app.ts:31) — verificado e mantido (breakpoint real coincide)
+- Execução real do CI pendente do incidente do GitHub Actions
+
+---
+
+## Commits principais
+
+| Commit | Descrição |
+|--------|-----------|
+| `9871efd` | docs(fase-05): create planning for mobile layout audit and fixes |
+| `dab0337` | docs(fase-05): incorporate plan review findings (overflow mask, minmax 380px, timeline, measurement techniques) |
+| `3e98323` | docs(fase-05): register responsive audit baseline (3 P0, 2 P1 findings) |
+| `267245e` | fix(responsive): eliminate horizontal overflow, timeline overlap and skip-link collision (0 overflow in 6 viewports) |
+| `d9b31e7` | test(responsive): cover overflow prevention, grid, skip-link, touch targets and timeline |
+| `8008798` | docs(fase-05): register post-fix re-audit (0 overflow, Lighthouse 100) |

@@ -8,7 +8,7 @@
 
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
-| 05 | Revisão completa do layout mobile e responsividade | 📋 Planejada | `fase-05-revisao-mobile.md` |
+|    |              |        |           |
 
 ---
 
@@ -20,6 +20,7 @@
 | 02 | Correção segurança/SEO: rel noopener, favicon e typo SVG | ✅ Concluída | `fase-02-links-noopener-e-favicon.md` |
 | 03 | Lint (ESLint + stylelint) e typecheck com CI | ✅ Concluída | `fase-03-lint-typecheck.md` |
 | 04 | Acessibilidade: Auditoria WCAG 2.1 AA + Correções | ✅ Concluída | `fase-04-acessibilidade.md` |
+| 05 | Revisão completa do layout mobile e responsividade | ✅ Concluída | `fase-05-revisao-mobile.md` |
 
 ---
 
