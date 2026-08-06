@@ -1,6 +1,7 @@
 ---
 description: Gerar um plano prático de testes para uma mudança no portfolio (Angular 20).
 name: gerar-testes
+agent: qa-frontend-portfolio
 ---
 
 Gere um plano de testes prático para a mudança selecionada no portfolio.
