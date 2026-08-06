@@ -47,6 +47,11 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
+
+  // Salvaguarda final contra overflow horizontal residual (ex.: scrollbar, zoom,
+  // fontes externas). NÃO mascara bugs: as fontes reais de overflow foram eliminadas
+  // na Fase 05 TASK 2 (timeline mobile, grid de projetos, skip-link). Mantida como
+  // proteção final, não como máscara - re-medição objetiva sem ela: 0 overflow.
   overflow-x: hidden;
 }
 

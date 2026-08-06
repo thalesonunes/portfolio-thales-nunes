@@ -4,12 +4,19 @@
   min-height: 100vh;
 }
 
-// Skip Link - always visible, WCAG 2.4.1 Bypass Blocks
+// Skip Link - WCAG 2.4.1 Bypass Blocks (G1 + C37)
+// Off-screen por padrão (translateY -400%) para não bloquear o clique no .menu-toggle
+// em telas <= 768px; entra na viewport ao receber foco (Tab) via transform no :focus.
+// MUDANÇA DE DECISÃO vs. Fase 04 ("sempre visível"): a auditoria da Fase 05 mediu que o
+// skip-link fixo (z-index 2000) cobria o .menu-toggle.active (z-index 1001) em 320px
+// (overlap 19px) e bloqueava o clique físico. O padrão hidden-until-focus é aceito pelo
+// WCAG 2.4.1 (técnica C37) e pelo Lighthouse, mantendo a11y 100/100 sem perder a
+// interação mobile. O elemento permanece no tab order e no DOM (testes preservados).
 .skip-link {
   position: fixed;
   top: var(--spacing-sm);
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-400%);
   z-index: 2000;
   display: inline-flex;
   align-items: center;
@@ -30,6 +37,7 @@
 
   &:focus {
     background: var(--accent-secondary);
+    transform: translateX(-50%);
   }
 }
 
@@ -216,6 +224,11 @@
   &.active {
     background: rgb(255 255 255 / 10%);
     border-color: rgb(255 255 255 / 20%);
+
+    // Posição deriva da largura da sidebar (280px): toggle 40px a ~28px da borda
+    // direita da sidebar aberta. Validado na Fase 05 em 320px (212-252px, sem
+    // sobrepor o conteúdo do hero; a colisão com o skip-link foi resolvida no
+    // próprio skip-link, que agora fica off-screen até receber foco).
     left: calc(180px + var(--spacing-lg));
     transform: rotate(180deg);
 
@@ -379,7 +392,10 @@
   text-align: center;
   margin-bottom: 4rem;
   color: #fff;
-  font-size: clamp(2rem, 4vw, 2.5rem);
+
+  // min 1.75rem reduz o título em <= ~700px (antes min 2rem = 32px estourava a
+  // hierarquia em 320/375); 4vw mantém a escala progressiva; desktop inalterado (max 2.5rem)
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 700;
   letter-spacing: -0.01em;
   position: relative;
@@ -420,6 +436,10 @@
       border-radius: 20px;
       border: 1px solid rgb(255 255 255 / 5%);
       text-align: center;
+
+      // Fase 05, P0: min-width: 0 evita que o min-content do card (h3/p) estoure a
+      // coluna 1fr em 320/375 (min-content da seção ia a 327px -> overflow do doc)
+      min-width: 0;
       transition: all 0.3s ease;
 
       &:hover {
@@ -472,7 +492,10 @@
 .projects-section {
   .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+
+    // min(100%, 380px) impede que a coluna fixa de 380px estoure o container
+    // em viewports < 380px (320/375) - Fase 05, P0 (overflow horizontal)
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
     gap: var(--spacing-2xl);
   }
 
@@ -830,6 +853,71 @@
   }
 }
 
+// Timeline empilhada (linha à esquerda, data acima do conteúdo) - Fase 05
+// Compartilhada entre mobile (<= 768px) e tablet (769-1024px). O padrão tablet
+// NÃO cobria 768px (breakpoint com width >= 769px), deixando a timeline desktop
+// ativa em 320/375 e causando overflow de 177px/123px (P0 #1). Além disso, o bloco
+// tablet não resetava `position: absolute` das datas -> overlap de 148-156px em
+// 1024px (P1 #4); corrigido aqui com `position: static !important`.
+// min-height: 0 remove os 200px forçados do layout alternado (desnecessários no
+// layout empilhado e que criavam vazios entre os itens).
+@mixin timeline-stacked(
+  $timeline-pad-left: var(--spacing-lg),
+  $line-left: 15px,
+  $item-pad-left: var(--spacing-2xl),
+  $content-pad: var(--spacing-lg)
+) {
+  .experience-section {
+    .timeline {
+      padding-left: $timeline-pad-left;
+      margin: 0;
+
+      &::before {
+        left: $line-left;
+        transform: none;
+      }
+    }
+
+    .timeline-item {
+      display: block !important;
+      padding-left: $item-pad-left;
+      position: relative;
+
+      // min-height 0: remove os 200px forçados do layout alternado (desnecessários no
+      // empilhado, criavam vazios). min-width 0: flex item da coluna não pode estourar
+      // o container pelo min-content (datas nowrap) em 320/375 (Fase 05, P0)
+      min-height: 0;
+      min-width: 0;
+
+      &::before {
+        left: $line-left;
+        transform: translateX(-50%);
+        top: 15px;
+        width: 12px;
+        height: 12px;
+      }
+
+      .timeline-date {
+        position: static !important;
+        order: 1 !important;
+        margin: 0 0 var(--spacing-sm) 0 !important;
+        padding: 0 !important;
+        text-align: left !important;
+        flex: none !important;
+        font-size: 0.9rem;
+      }
+
+      .timeline-content {
+        order: 2 !important;
+        margin: 0 !important;
+        text-align: left !important;
+        max-width: none !important;
+        padding: $content-pad;
+      }
+    }
+  }
+}
+
 // Mobile menu toggle
 @media (width <= 768px) {
   .sidebar {
@@ -900,7 +988,10 @@
 
     .intro-text {
       .name {
-        font-size: clamp(2rem, 8vw, 3.5rem);
+        // Fase 05, TASK 3: container real ~230px em 320 (após corrigir o overflow do
+        // .main-content). 2rem (32px) forçava quebra desequilibrada; 1.9rem com 7vw
+        // mantém presença e quebra em "Thales" / "Nunes" de forma equilibrada.
+        font-size: clamp(1.9rem, 7vw, 3.5rem);
       }
 
       .title {
@@ -916,6 +1007,22 @@
     .action-buttons {
       justify-content: center;
     }
+  }
+
+  // Fase 05, P0 #1: timeline empilhada em mobile (o padrão tablet 769-1024 não cobre 768px)
+  @include timeline-stacked(
+    $timeline-pad-left: var(--spacing-md),
+    $line-left: 8px,
+    $item-pad-left: 36px,
+    $content-pad: var(--spacing-md)
+  );
+
+  // Fase 05, TASK 3 + P0: h3 da timeline em 1.25rem no mobile - o min-content de
+  // "Desenvolvedor de Soluções Digitais" a 1.4rem (163px) estourava o layout
+  // viewport 320 (313px > clientWidth 308). Menor também melhora a hierarquia
+  // tipográfica em telas pequenas.
+  .experience-section .timeline .timeline-content h3 {
+    font-size: 1.25rem;
   }
 
   // Mobile adaptations for new sections
@@ -934,6 +1041,17 @@
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
   }
+
+  // Fase 05, TASK 3: contact items com respiro adequado em 320/375
+  // (padding 32px 48px + min-width 200px era folgado para o container pós-correção)
+  .contact-section .contact-methods {
+    gap: var(--spacing-md);
+
+    .contact-item {
+      min-width: 0;
+      padding: var(--spacing-md) var(--spacing-lg);
+    }
+  }
 }
 
 // Tablet specific styles
@@ -948,48 +1066,9 @@
     gap: var(--spacing-xl);
   }
 
-  .experience-section {
-    .timeline {
-      padding-left: var(--spacing-lg);
-      margin: 0;
-
-      &::before {
-        left: 15px;
-        transform: none;
-      }
-    }
-
-    .timeline-item {
-      display: block !important;
-      padding-left: var(--spacing-2xl);
-      position: relative;
-
-      &::before {
-        left: 15px;
-        transform: translateX(-50%);
-        top: 15px;
-        width: 12px;
-        height: 12px;
-      }
-
-      .timeline-date {
-        order: 1 !important;
-        margin: 0 0 var(--spacing-sm) 0 !important;
-        padding: 0 !important;
-        text-align: left !important;
-        flex: none !important;
-        font-size: 0.9rem;
-      }
-
-      .timeline-content {
-        order: 2 !important;
-        margin: 0 !important;
-        text-align: left !important;
-        max-width: none !important;
-        padding: var(--spacing-lg);
-      }
-    }
-  }
+  // Fase 05: timeline empilhada no tablet (reaproveitada do mixin; inclui
+  // position: static nas datas - corrige o overlap de 148-156px em 1024px, P1 #4)
+  @include timeline-stacked;
 
   .contact-methods {
     flex-direction: column;
