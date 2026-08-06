@@ -192,4 +192,80 @@ describe('AppComponent', () => {
       });
     });
   });
+
+  describe('accessibility', () => {
+    it('should have a skip link pointing to #main-content with visible text', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const skipLink = compiled.querySelector(
+        'a.skip-link[href="#main-content"]',
+      ) as HTMLAnchorElement;
+      expect(skipLink).toBeTruthy();
+      expect(skipLink?.textContent?.trim()).toBe('Pular para conteúdo');
+    });
+
+    it('should have an accessible name on every external link (target="_blank")', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const externalLinks: NodeListOf<HTMLAnchorElement> =
+        compiled.querySelectorAll('a[target="_blank"]');
+      expect(externalLinks.length).toBeGreaterThan(0);
+      externalLinks.forEach((link) => {
+        const accessibleName =
+          link.textContent?.trim() || link.getAttribute('aria-label') || '';
+        expect(accessibleName).not.toBe('');
+      });
+    });
+
+    it('should toggle aria-expanded on menu-toggle button', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      const app = fixture.componentInstance;
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const toggle = compiled.querySelector(
+        '.menu-toggle',
+      ) as HTMLButtonElement;
+      expect(toggle).toBeTruthy();
+      expect(toggle.getAttribute('aria-expanded')).toBe('false');
+
+      app.toggleSidebar();
+      fixture.detectChanges();
+      expect(toggle.getAttribute('aria-expanded')).toBe('true');
+
+      app.toggleSidebar();
+      fixture.detectChanges();
+      expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('should have aria-label on nav#sidebar', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const nav = compiled.querySelector('nav#sidebar') as HTMLElement;
+      expect(nav).toBeTruthy();
+      expect(nav.getAttribute('aria-label')).toBe('Navegação principal');
+    });
+
+    it('should have main#main-content as the skip link target', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const main = compiled.querySelector('main#main-content') as HTMLElement;
+      expect(main).toBeTruthy();
+    });
+
+    it('should have aria-hidden="true" on every decorative material-icons element', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const icons: NodeListOf<HTMLElement> =
+        compiled.querySelectorAll('i.material-icons');
+      expect(icons.length).toBeGreaterThan(0);
+      icons.forEach((icon) => {
+        expect(icon.getAttribute('aria-hidden')).toBe('true');
+      });
+    });
+  });
 });
