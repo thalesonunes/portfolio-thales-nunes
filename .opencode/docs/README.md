@@ -8,7 +8,7 @@
 
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
-|    |              |        |           |
+| 03 | Lint (ESLint + stylelint) e typecheck com CI | 📋 Planejada | `fase-03-lint-typecheck.md` |
 
 ---
 
