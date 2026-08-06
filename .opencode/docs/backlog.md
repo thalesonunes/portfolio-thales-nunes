@@ -36,7 +36,7 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 
 ## 🐛 Debts / Pendências Conhecidas
 
-- [ ] **Preview das PRs no Vercel falhando (`ng: command not found`)** — a integração Vercel for GitHub roda o build na **raiz** do repo (sem `angular.json`/`ng`); só o GitHub Actions (`working-directory: ./portfolio`) deploya com sucesso. Correção: criar `vercel.json` na raiz com `{"rootDirectory": "portfolio"}` OU configurar Root Directory = `portfolio` no dashboard do projeto Vercel. Produção não é afetada (deploy via CI funciona). Identificado na revisão da Fase 01.
+- [ ] **Preview das PRs no Vercel falhando (`ng: command not found`)** — a integração Vercel for GitHub roda o build na **raiz** do repo (sem `angular.json`/`ng`); só o GitHub Actions (`working-directory: ./portfolio`) deploya com sucesso. ⚠️ **Aprendizado (06/08/2026):** `rootDirectory` NÃO é campo válido do `vercel.json` (schema rejeita — tentativa na PR #8 revertida na #9). Correção real: configurar **Root Directory = `portfolio`** no dashboard do projeto Vercel (Settings → General) ou via API `PATCH /v9/projects`. Produção não é afetada (deploy via CI funciona).
 - [ ] `app.scss` crescer demais → considerar split por seção
 - [ ] Verificar budgets de produção no CI
 - [ ] Hero: texto `#ccc` sobre foto panorâmica — contraste não garantido (pré-existente, requer avaliação visual humana)
