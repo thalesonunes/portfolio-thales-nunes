@@ -1,0 +1,4 @@
+# Opencode harness local files
+*.log
+node_modules/
+dist/
