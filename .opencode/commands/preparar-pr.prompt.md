@@ -1,7 +1,7 @@
 ---
 description: Preparar uma Pull Request com título, resumo, testes e riscos para o portfolio.
 name: preparar-pr
-agent: review-portfolio
+agent: fullstack-portfolio
 ---
 
 Prepare uma Pull Request pronta para revisão do portfolio.
