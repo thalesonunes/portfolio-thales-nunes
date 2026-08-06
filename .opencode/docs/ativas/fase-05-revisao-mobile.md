@@ -350,3 +350,72 @@ vp-320-projects-grid.png
 ```
 
 **Working tree:** limpo ao final da auditoria (nenhum arquivo de código editado; `overflow-x: hidden` NÃO foi alterado em `styles.scss` — exposto apenas via `document.body.style.overflowX = 'visible'` no runtime, revertido ao final). Única mudança: este documento.
+
+---
+
+## TASKs 2-3 — Correções aplicadas (resultado)
+
+**Executada em:** 06/08/2026 (`frontend-portfolio`)
+**Escopo:** `portfolio/src/app/app.scss`, `portfolio/src/styles.scss` (nenhuma mudança em `app.ts`/`app.html`)
+
+### 11.1 Status dos achados da auditoria
+
+| # | Prio | Achado | Status | Correção |
+|---|---|---|---|---|
+| 1 | P0 | Timeline desktop ativa em ≤768px → overflow 177/123px | ✅ **Corrigido** | Media query ≤768 com timeline empilhada (mixin `timeline-stacked`, reutilizado do padrão tablet; o padrão tablet 769-1024 não cobria 768px) |
+| 2 | P0 | Grid de projetos `minmax(380px, 1fr)` → coluna 380px em 320/375 | ✅ **Corrigido** | `minmax(min(100%, 380px), 1fr)` |
+| 3 | P0 | `overflow-x: hidden` no body mascara overflow | ✅ **Resolvido** | Mantido apenas como salvaguarda final com justificativa em código — re-medição com overflow exposto via JS: **0 overflow nos 6 viewports** |
+| 4 | P1 | Timeline 1024×768: datas `absolute` sobrepõem conteúdo (148–156px) | ✅ **Corrigido** | `position: static !important` no `.timeline-date` dentro do mixin (usado no tablet 769-1024) |
+| 5 | P1 | Skip-link cobre `.menu-toggle.active` em 320px (overlap 19px, clique falhava) | ✅ **Corrigido** | Skip-link off-screen (`translateY(-400%)`) até `:focus` (ver 11.3 — mudança de decisão) |
+| 6 | P2 | `menu-toggle.active` left 212px frágil | ✅ **Validado** | Posição mantida (212–252px): não sobrepõe conteúdo do hero; a colisão era do skip-link (corrigido na origem). Comentário de justificativa adicionado |
+| 7 | P2 | Tipografia 320px (hero name, section-title, espaçamentos) | ✅ **Refinado** | Hero name `clamp(1.9rem, 7vw, 3.5rem)`; section-title `clamp(1.75rem, 4vw, 2.5rem)`; h3 da timeline 1.25rem em mobile; contact items com padding/min-width reduzidos |
+| 8 | P2 | `scrollToSection` `<= 768` hardcoded | ✅ **Mantido (sem mudança)** | Breakpoint real da sidebar é `@media (width <= 768px)` — o valor 768 continua correto; nenhuma alteração de comportamento |
+| — | P0 (novo, descoberto na execução) | `#skills` min-content 327px e `#experience` min-content 313px (grid/flex items com `min-width: auto`) estouravam o doc em 320 mesmo após os fixes principais | ✅ **Corrigido** | `min-width: 0` no `.skill-item` e no `.timeline-item` (fix padrão de min-content) |
+
+### 11.2 Re-medição objetiva (overflow exposto via JS)
+
+| Viewport | `docScrollW` | `docClientW` | Overflow real (px) | `scrollWidth <= clientWidth` |
+|---|---|---|---|---|
+| 320×568 | 308 | 308 | **0** | ✅ |
+| 375×667 | 363 | 363 | **0** | ✅ |
+| 768×1024 | 756 | 756 | **0** | ✅ |
+| 1024×768 | 1012 | 1012 | **0** | ✅ |
+| 1280×800 | 1268 | 1268 | **0** | ✅ |
+| 1440×900 | 1428 | 1428 | **0** | ✅ |
+
+**Timeline (sem sobreposição em nenhum viewport):**
+- 320/375/768/1024: layout empilhado — `.timeline-date` `position: static`, `overlapY = 0` nos 3 itens
+- 1280/1440: layout desktop preservado — `overlapX = 0` (datas no lado oposto da linha)
+
+**Interações (320px):**
+- Clique físico no `.menu-toggle` com sidebar aberta: **fecha a sidebar** (antes falhava — timeout do Playwright)
+- Skip-link off-screen quando sem foco (`top: -250px`); ao pressionar Tab: **foca e entra na viewport** (8–73px, pill centralizado)
+
+### 11.3 Mudança de decisão — skip-link (documentada)
+
+- **Fase 04:** skip-link "sempre visível" (fixo no topo, z-index 2000)
+- **Fase 05 (auditoria):** o skip-link fixo cobre o `.menu-toggle.active` (z-index 1001) em 320px — overlap 19px, clique físico falhou (Playwright timeout)
+- **Decisão:** padrão **hidden-until-focus** (técnica WCAG 2.4.1 C37): `transform: translateX(-50%) translateY(-400%)` por padrão; `:focus` restaura `translateX(-50%)` e o link entra na viewport. O elemento permanece no DOM e no tab order (testes de a11y preservados)
+- **Justificativa técnica:** o padrão é aceito pelo WCAG 2.4.1 (G1 + C37) e pelo Lighthouse; **a11y mantido em 100/100** (re-auditoria abaixo). Resolve o bloqueio mobile sem perder o bypass de navegação
+
+### 11.4 Validação
+
+| Comando | Resultado |
+|---|---|
+| `npm run lint` | ✅ 0 problems |
+| `npm run lint:styles` | ✅ 0 problems |
+| `npm run typecheck` | ✅ exit 0 |
+| `npm test` | ✅ 21/21 SUCCESS (executado com `--watch=false --browsers=ChromeHeadless`; `npm test` puro fica em watch mode) |
+| `npm run build` | ✅ OK — Initial total 286.03 kB (budget 500 kB), styles 14.28 kB (budget 25 kB) |
+| Lighthouse a11y (desktop) | ✅ **100/100** (Best Practices 100, SEO 100) |
+
+**Screenshots pós-correção** (evidência visual — `/tmp/opencode/fase05/pos/`):
+
+```
+vp-320x568-full.png   vp-375x667-full.png   vp-768x1024-full.png
+vp-1024x768-full.png  vp-1280x800-full.png  vp-1440x900-full.png
+vp-320-timeline.png   vp-1024-timeline.png  vp-1440-timeline.png
+vp-320-sidebar-open.png
+```
+
+**Nota:** o servidor dev da auditoria (porta 4201, Vite) foi encerrado durante a execução; a re-medição usou servidor próprio em `127.0.0.1:4205` com HMR ativo.
