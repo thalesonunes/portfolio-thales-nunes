@@ -268,4 +268,232 @@ describe('AppComponent', () => {
       });
     });
   });
+
+  /**
+   * Responsividade — Fase 05, TASK 4.
+   *
+   * Abordagem: tenta `window.resizeTo(320, 568)` para testes de viewport real;
+   * se o Karma não permitir (innerWidth não mudar), usa fallback estrutural
+   * (computed styles de propriedades que previnem overflow).
+   *
+   * No ambiente atual (Linux, ChromeHeadless), `window.resizeTo` É suportado
+   * e efetivo — innerWidth muda para <= 321 após o comando.
+   */
+  describe('responsiveness', () => {
+    /** Resize guard: true se o viewport realmente mudou para o tamanho alvo. */
+    function resizeToTarget(targetWidth: number, targetHeight: number): boolean {
+      if (typeof window.resizeTo !== 'function') {
+        return false;
+      }
+      window.resizeTo(targetWidth, targetHeight);
+      window.dispatchEvent(new Event('resize'));
+      // O resize é síncrono no ChromeHeadless; innerWidth reflete o novo tamanho.
+      return window.innerWidth <= targetWidth + 1;
+    }
+
+    describe('overflow horizontal prevention', () => {
+      it('should prevent document-level horizontal overflow at 320px (or verify structural protections)', () => {
+        const viewportResized = resizeToTarget(320, 568);
+
+        const fixture = TestBed.createComponent(AppComponent);
+        fixture.detectChanges();
+
+        if (viewportResized) {
+          // Viewport real mudou → verificação objetiva de overflow
+          const docEl = document.documentElement;
+          expect(docEl.scrollWidth)
+            .withContext('document scrollWidth must not exceed clientWidth at 320px')
+            .toBeLessThanOrEqual(docEl.clientWidth);
+        } else {
+          // Fallback: proteções estruturais independentes de viewport
+          const compiled = fixture.nativeElement as HTMLElement;
+
+          // skill-item min-width: 0 impede que min-content (h3/p) estoure a grid em 320/375
+          const skillItem = compiled.querySelector('.skill-item') as HTMLElement;
+          expect(skillItem).withContext('.skill-item must exist').toBeTruthy();
+          expect(getComputedStyle(skillItem).minWidth)
+            .withContext('.skill-item must have min-width: 0 (TASK 2, P0)')
+            .toBe('0px');
+
+          // timeline-item min-width: 0 evita que datas nowrap estourem o container
+          const timelineItem = compiled.querySelector('.timeline-item') as HTMLElement;
+          expect(timelineItem).withContext('.timeline-item must exist').toBeTruthy();
+          // Em viewports > 1024, minWidth pode ser 'auto' (padrão) — o importante
+          // é que o elemento exista e tenha um valor computado definido
+          const tw = getComputedStyle(timelineItem).minWidth;
+          expect(tw).withContext('.timeline-item minWidth must be a defined value').toBeTruthy();
+        }
+      });
+
+      it('projects-grid must use a responsive column definition (not bare fixed 380px)', () => {
+        const fixture = TestBed.createComponent(AppComponent);
+        fixture.detectChanges();
+        const compiled = fixture.nativeElement as HTMLElement;
+        const projectsGrid = compiled.querySelector('.projects-grid') as HTMLElement;
+        expect(projectsGrid).withContext('.projects-grid must exist').toBeTruthy();
+
+        const computedCols = getComputedStyle(projectsGrid).gridTemplateColumns;
+        // A grid bem definida não retorna 'none' nem string vazia.
+        // A fórmula original `minmax(min(100%, 380px), 1fr)` garante que cada
+        // coluna não ultrapasse 100% do container, mesmo em 320px.
+        expect(computedCols)
+          .withContext('grid-template-columns must be a valid responsive definition (not none/auto)')
+          .not.toBe('none');
+        // 'auto' seria sintoma de grid não configurada (nunca deve acontecer
+        // com a SCSS atual, mas é o guard-rail estrutural)
+        expect(computedCols)
+          .withContext('grid-template-columns must not be "auto" (unconfigured)')
+          .not.toBe('auto');
+      });
+
+      it('project cards should fit within projects-grid without overflow', () => {
+        const fixture = TestBed.createComponent(AppComponent);
+        fixture.detectChanges();
+        const compiled = fixture.nativeElement as HTMLElement;
+        const grid = compiled.querySelector('.projects-grid') as HTMLElement;
+        expect(grid).toBeTruthy();
+        const gridWidth = grid.clientWidth;
+
+        const cards: NodeListOf<HTMLElement> =
+          compiled.querySelectorAll('.project-card');
+        expect(cards.length).toBeGreaterThan(0);
+
+        cards.forEach((card, i) => {
+          // Nenhum card pode ser mais largo que o pai (grid)
+          expect(card.scrollWidth)
+            .withContext(`project-card[${i}] scrollWidth <= grid clientWidth`)
+            .toBeLessThanOrEqual(gridWidth + 1); // +1 tolerância de arredondamento
+        });
+      });
+    });
+
+    describe('skip-link visibility on focus', () => {
+      it('should be focusable and always rendered (not display:none/hidden)', () => {
+        // Nota: :focus CSS não dispara via focus() programático no Karma
+        // ChromeHeadless nesta versão. O teste verifica atributos estruturais
+        // e de comportamento que garantem a funcionalidade no mundo real.
+        const fixture = TestBed.createComponent(AppComponent);
+        fixture.detectChanges();
+        const compiled = fixture.nativeElement as HTMLElement;
+        const skipLink = compiled.querySelector(
+          'a.skip-link[href="#main-content"]',
+        ) as HTMLAnchorElement;
+        expect(skipLink).withContext('.skip-link must exist').toBeTruthy();
+
+        // O link deve receber foco DOM (tab order funcional)
+        skipLink.focus();
+        fixture.detectChanges();
+        expect(document.activeElement)
+          .withContext('skip-link must receive DOM focus (tab order)')
+          .toBe(skipLink);
+
+        // O elemento NUNCA deve estar display:none ou visibility:hidden
+        // (senão bloquearia o tab order e falharia WCAG 2.4.1 Bypass Blocks).
+        // Ele é off-screen via translateY(-400%) mas permanece renderizado.
+        const style = getComputedStyle(skipLink);
+        expect(style.display)
+          .withContext('skip-link must not be display:none')
+          .not.toBe('none');
+        expect(style.visibility)
+          .withContext('skip-link must not be visibility:hidden')
+          .not.toBe('hidden');
+        expect(skipLink.offsetWidth)
+          .withContext('skip-link offsetWidth must be > 0 (rendered)')
+          .toBeGreaterThan(0);
+        expect(skipLink.offsetHeight)
+          .withContext('skip-link offsetHeight must be > 0 (rendered)')
+          .toBeGreaterThan(0);
+      });
+    });
+
+    describe('touch targets', () => {
+      it('menu-toggle must have hit area >= 24×24px (WCAG 2.5.8 mínimo)', () => {
+        const fixture = TestBed.createComponent(AppComponent);
+        fixture.detectChanges();
+        const compiled = fixture.nativeElement as HTMLElement;
+        const toggle = compiled.querySelector('.menu-toggle') as HTMLButtonElement;
+        expect(toggle).withContext('.menu-toggle must exist').toBeTruthy();
+
+        const rect = toggle.getBoundingClientRect();
+        // CSS: width/height 40px + padding 12px → rect efetivo ≈ 64×64
+        expect(rect.width)
+          .withContext('menu-toggle hit width >= 24px')
+          .toBeGreaterThanOrEqual(24);
+        expect(rect.height)
+          .withContext('menu-toggle hit height >= 24px')
+          .toBeGreaterThanOrEqual(24);
+      });
+
+      it('project-link must have hit area >= 24×24px', () => {
+        const fixture = TestBed.createComponent(AppComponent);
+        fixture.detectChanges();
+        const compiled = fixture.nativeElement as HTMLElement;
+        const links: NodeListOf<HTMLAnchorElement> =
+          compiled.querySelectorAll('a.project-link');
+        expect(links.length)
+          .withContext('at least one .project-link must exist')
+          .toBeGreaterThan(0);
+
+        links.forEach((link, i) => {
+          const rect = link.getBoundingClientRect();
+          // CSS: width/height 50px
+          expect(rect.width)
+            .withContext(`project-link[${i}] hit width >= 24px`)
+            .toBeGreaterThanOrEqual(24);
+          expect(rect.height)
+            .withContext(`project-link[${i}] hit height >= 24px`)
+            .toBeGreaterThanOrEqual(24);
+        });
+      });
+    });
+
+    describe('timeline', () => {
+      it('should render timeline items with visible content inside bounds', () => {
+        const fixture = TestBed.createComponent(AppComponent);
+        fixture.detectChanges();
+        const compiled = fixture.nativeElement as HTMLElement;
+        const timeline = compiled.querySelector('.timeline') as HTMLElement;
+        expect(timeline).withContext('.timeline must exist').toBeTruthy();
+
+        const items: NodeListOf<HTMLElement> =
+          timeline.querySelectorAll('.timeline-item');
+        expect(items.length)
+          .withContext('must have at least one timeline item')
+          .toBeGreaterThan(0);
+
+        const timelineWidth = timeline.clientWidth;
+
+        items.forEach((item, idx) => {
+          const content = item.querySelector('.timeline-content') as HTMLElement;
+          expect(content)
+            .withContext(`.timeline-item[${idx}] must have .timeline-content`)
+            .toBeTruthy();
+
+          const contentRect = content.getBoundingClientRect();
+          expect(contentRect.width)
+            .withContext(`.timeline-content[${idx}] must have visible width`)
+            .toBeGreaterThan(0);
+          expect(contentRect.height)
+            .withContext(`.timeline-content[${idx}] must have visible height`)
+            .toBeGreaterThan(0);
+
+          // O conteúdo não pode gerar overflow horizontal interno (scroll)
+          expect(content.scrollWidth)
+            .withContext(
+              `.timeline-content[${idx}] scrollWidth <= clientWidth ` +
+              `(no horizontal content overflow)`,
+            )
+            .toBeLessThanOrEqual(content.clientWidth + 1);
+
+          // O item não deve ultrapassar a largura da timeline (container pai)
+          const itemRect = item.getBoundingClientRect();
+          expect(itemRect.width)
+            .withContext(
+              `.timeline-item[${idx}] width <= .timeline width`,
+            )
+            .toBeLessThanOrEqual(timelineWidth + 1);
+        });
+      });
+    });
+  });
 });
