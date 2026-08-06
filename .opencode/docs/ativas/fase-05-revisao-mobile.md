@@ -1,7 +1,7 @@
 # Fase 05 — Revisão completa do layout mobile e responsividade
 
 **Branch:** `feature/fase-05-revisao-mobile`
-**Status:** 📋 Planejada
+**Status:** ✅ Concluída
 
 ---
 
@@ -218,18 +218,18 @@ Cada task deve:
 
 ## Critérios de Aceitação
 
-- [ ] **Review do plano realizado antes da implementação** (TASK 0) — ata registrada
-- [ ] Auditoria baseline documentada com screenshots (6 viewports × todas as seções)
-- [ ] 0 scroll horizontal nos 6 viewports — **medição objetiva**: `document.documentElement.scrollWidth <= document.documentElement.clientWidth` (false para overflow)
-- [ ] 0 conteúdo cortado/sobreposto nos 6 viewports
-- [ ] Touch targets ≥ 24px (AA) em todos os controles — medidos via `getBoundingClientRect()`
-- [ ] Alinhamento consistente entre viewports
-- [ ] Tipografia refinada e legível em ≤ 768px
-- [ ] Lighthouse a11y mantido em 100/100
-- [ ] Testes: 21 existentes + novos passando
-- [ ] Lints zerados, typecheck OK, build OK (budgets)
-- [ ] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
-- [ ] Revisão final (`review-portfolio`) aprovada
+- [x] **Review do plano realizado antes da implementação** (TASK 0) — ata registrada
+- [x] Auditoria baseline documentada com screenshots (6 viewports × todas as seções)
+- [x] 0 scroll horizontal nos 6 viewports — **medição objetiva**: `document.documentElement.scrollWidth <= document.documentElement.clientWidth` (false para overflow)
+- [x] 0 conteúdo cortado/sobreposto nos 6 viewports
+- [x] Touch targets ≥ 24px (AA) em todos os controles — medidos via `getBoundingClientRect()`
+- [x] Alinhamento consistente entre viewports
+- [x] Tipografia refinada e legível em ≤ 768px
+- [x] Lighthouse a11y mantido em 100/100
+- [x] Testes: 21 existentes + 7 novos = 28/28 passando
+- [x] Lints zerados, typecheck OK, build OK (budgets)
+- [x] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
+- [x] Revisão final (`review-portfolio`) aprovada
 
 ---
 
@@ -419,3 +419,104 @@ vp-320-sidebar-open.png
 ```
 
 **Nota:** o servidor dev da auditoria (porta 4201, Vite) foi encerrado durante a execução; a re-medição usou servidor próprio em `127.0.0.1:4205` com HMR ativo.
+
+---
+
+## TASK 5 — Pós-correção: Re-auditoria e validação final
+
+**Executada em:** 06/08/2026 (`review-portfolio` — revisão final)
+**Método:** Playwright MCP (`browser_run_code_unsafe`) + Chrome DevTools MCP (Lighthouse). Servidor dev na porta 4205.
+
+### 12.1 Qualidade — comandos obrigatórios
+
+| Comando | Resultado |
+|---|---|
+| `npm run lint` | ✅ 0 problems |
+| `npm run lint:styles` | ✅ 0 problems |
+| `npm run typecheck` | ✅ exit 0 |
+| `npm test -- --no-watch --browsers=ChromeHeadless` | ✅ **28/28 SUCCESS** |
+| `npm run build` | ✅ OK — Initial 286.03 kB (budget 500 kB), styles 14.28 kB (budget 25 kB) |
+
+### 12.2 Re-medição overflow (overflow-x exposto via JS — `document.body.style.overflowX = 'visible'`)
+
+| Viewport | `docScrollW` | `docClientW` | Overflow (px) | Seções com overflow |
+|---|---|---|---|---|
+| 320×568 | 308 | 308 | **0** | 0 |
+| 375×667 | 363 | 363 | **0** | 0 |
+| 768×1024 | 756 | 756 | **0** | 0 |
+| 1024×768 | 1012 | 1012 | **0** | 0 |
+| 1280×800 | 1268 | 1268 | **0** | 0 |
+| 1440×900 | 1428 | 1428 | **0** | 0 |
+
+### 12.3 Verificações específicas
+
+**Timeline 320px (layout empilhado):**
+- `.timeline` width: 256px, scrollWidth: 256px (sem overflow interno) ✅
+- `.timeline-date` em todos os itens: `position: static` ✅
+- `.timeline-content` width: 202px, scrollWidth: 202px (conteúdo dentro dos limites) ✅
+- h3 timeline: 1.25rem (hierarquia adequada) ✅
+
+**Timeline 1024px (layout empilhado tablet):**
+- `.timeline-date` em todos os itens: `position: static` ✅
+- Datas e conteúdo empilhados verticalmente (sem overlap horizontal — as datas no layout desktop absoluto sobrepunham 148–156px; resolvido) ✅
+
+**Skip-link (320px):**
+- Primeiro elemento na tab order (índice 0 de 23) ✅
+- Tab na página limpa foca o skip-link corretamente ✅
+- `:focus` aplica `transform: translateX(-50%)` (remove `translateY(-400%)`), elemento entra na viewport ✅
+- Elemento SEMPRE renderizado (`display: flex`, `visibility: visible`, `offsetWidth > 0`) — nunca `display: none` ✅
+- Lighthouse a11y 100/100 confirma conformidade WCAG 2.4.1 ✅
+
+**Toggle sidebar (320px):**
+- Abre sidebar (clique físico via Playwright) ✅
+- Fecha sidebar (clique no toggle na posição ativa, `left: 212px`) ✅
+- Sem colisão com skip-link (skip-link off-screen quando toggle ativo) ✅
+
+**Contact items (320px):**
+- `min-width: 0` aplicado (não estoura o container) ✅
+- Rect widths: 148–188px (dentro do container de ~256px) ✅
+
+**Touch targets:**
+- `.menu-toggle`: 40×40px ✅
+- `.project-link` (6×): 50×50px ✅
+- Todos ≥ 24px (WCAG 2.5.8 AA) ✅
+
+### 12.4 Lighthouse
+
+| Categoria | Score |
+|---|---|
+| Accessibility | **100/100** |
+| Best Practices | **100/100** |
+| SEO | **100/100** |
+
+49 auditorias passaram, 0 falharam. Nenhuma regressão da Fase 04.
+
+### 12.5 Testes — integridade
+
+- **21 testes originais:** preservados, sem alterações ✅
+- **7 novos testes:** overflow (320px + fallback estrutural), grid column definition, project cards fit, skip-link focusable/rendered, menu-toggle hit area, project-link hit area, timeline items bounds ✅
+- **Total:** 28/28 SUCCESS ✅
+
+### 12.6 Screenshots da re-auditoria
+
+Evidência visual salva em `.playwright-mcp/fase05/`:
+
+```
+vp-320x568-full.png       vp-320x568-timeline.png
+vp-1024x768-timeline.png
+```
+
+### 12.7 Veredito da revisão final
+
+**APROVADO** ✅
+
+Todos os critérios do backlog foram atendidos:
+- 0 scroll horizontal nos 6 viewports (medição objetiva)
+- 0 conteúdo cortado/sobreposto
+- Touch targets ≥ 24px em todos os controles
+- Lighthouse a11y 100/100 (sem regressão)
+- 28/28 testes passando
+- Lint, lint:styles, typecheck, build: todos OK
+- Orçamentos respeitados (286 kB de 500 kB)
+- Skip-link: padrão hidden-until-focus (WCAG C37), documentado, funcional e a11y-compliant
+- Regra do Escoteiro aplicada: `overflow-x` documentado como salvaguarda, mixin `timeline-stacked` DRY, comentários de justificativa em todas as mudanças
