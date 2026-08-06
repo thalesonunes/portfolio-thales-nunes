@@ -28,9 +28,9 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] Performance budgets monitoring (Lighthouse CI)
 
 ### Acessibilidade
-- [ ] Auditoria completa WCAG 2.1 AA
-- [ ] Skip links
-- [ ] Focus visible states consistentes
+- [x] Auditoria completa WCAG 2.1 AA — ✅ entregue na Fase 04: Lighthouse a11y 100/100 (antes 90), checklist documentado
+- [x] Skip links — ✅ entregue na Fase 04 (sempre visível, alvo `#main-content`)
+- [x] Focus visible states consistentes — ✅ entregue na Fase 04 (outline accent global)
 
 ---
 
@@ -39,7 +39,9 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] **Preview das PRs no Vercel falhando (`ng: command not found`)** — a integração Vercel for GitHub roda o build na **raiz** do repo (sem `angular.json`/`ng`); só o GitHub Actions (`working-directory: ./portfolio`) deploya com sucesso. Correção: criar `vercel.json` na raiz com `{"rootDirectory": "portfolio"}` OU configurar Root Directory = `portfolio` no dashboard do projeto Vercel. Produção não é afetada (deploy via CI funciona). Identificado na revisão da Fase 01.
 - [ ] `app.scss` crescer demais → considerar split por seção
 - [ ] Verificar budgets de produção no CI
-- [ ] 8 links SVG de overlay dos projetos sem nome acessível (sem `aria-label`/`title`) — leitores de tela anunciam "link vazio" (identificado na revisão da Fase 02)
+- [ ] Hero: texto `#ccc` sobre foto panorâmica — contraste não garantido (pré-existente, requer avaliação visual humana)
+- [ ] Foco automático no drawer ao abrir (APG) — deferido na Fase 04; controles alcançáveis via Shift+Tab
+- [ ] `:focus`/`:focus-visible` redundantes (regras idênticas) — simplificar (cosmético)
 - [ ] Aviso `baseline-browser-mapping` desatualizado no build/test (corrigir com `npm i baseline-browser-mapping@latest -D`)
 - [ ] Duplicata leve de `.animate-fade-up` (styles.scss 0.6s vs app.scss 0.8s) — unificar em refatoração futura
 - [ ] `AppComponent` sem `ChangeDetection.OnPush` (melhoria de performance)
@@ -57,6 +59,7 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [x] Links externos com `rel="noopener noreferrer"` + teste de regressão (Fase 02)
 - [x] Favicon set completo: apple-touch-icon, manifest.webmanifest, theme-color (Fase 02)
 - [x] Typo corrigido nos SVGs do ícone GitHub (`1.30` → `1.23`) (Fase 02)
+- [x] Auditoria WCAG 2.1 AA: Lighthouse a11y 100/100, skip link, focus visible, ARIA labels (Fase 04)
 
 ---
 

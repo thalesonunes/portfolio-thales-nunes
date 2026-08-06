@@ -1,7 +1,7 @@
 # Fase 04 — Acessibilidade: Auditoria WCAG 2.1 AA + Correções
 
 **Branch:** `feature/fase-04-acessibilidade`
-**Status:** 📋 Planejada
+**Status:** ✅ Concluída
 
 ---
 
@@ -230,16 +230,55 @@ Cada task deve:
 
 ## Critérios de Aceitação
 
-- [ ] Skip link sempre visível, funcional (WCAG 2.4.1)
-- [ ] Focus visible consistente em todos os interativos (WCAG 2.4.7)
-- [ ] Nomes acessíveis: 8 links projetos, ícones sociais, toggle (aria-expanded), nav (4.1.2/1.1.1)
-- [ ] Ordem de headings corrigida (1.3.1)
-- [ ] Checklist WCAG 2.1 AA (aplicável) documentado e atendido
-- [ ] Lighthouse a11y **≥ 90** (registrar antes/depois)
-- [ ] Testes novos + 15 existentes passando
-- [ ] Lints zerados, build OK, budgets OK
-- [ ] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
-- [ ] Revisão final (`review-portfolio`) aprovada
+- [x] Skip link sempre visível, funcional (WCAG 2.4.1)
+- [x] Focus visible consistente em todos os interativos (WCAG 2.4.7)
+- [x] Nomes acessíveis: links projetos, ícones sociais, toggle (aria-expanded), nav (4.1.2/1.1.1)
+- [x] Ordem de headings corrigida (1.3.1)
+- [x] Checklist WCAG 2.1 AA (aplicável) documentado e atendido
+- [x] Lighthouse a11y **100/100** (antes: 90) — 48 passed, 0 failed
+- [x] Testes novos (6) + 15 existentes passando → **21/21**
+- [x] Lints zerados, build OK (284 kB initial), budgets OK
+- [x] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
+- [x] Revisão final (`review-portfolio`) aprovada
+
+---
+
+## Delta (Plano vs. Entrega)
+
+| Aspecto | Plano | Entrega |
+|---------|-------|---------|
+| Skip link | Sempre visível (decisão) | ✅ Igual — pill accent fixa topo-centro, z-index 2000, alvo `<main id="main-content" tabindex="-1">` |
+| Focus visible | Customizado com accent | ✅ Igual — `:focus` + `:focus-visible` outline 2px accent global |
+| ARIA | Cobertura completa | ✅ Igual + extra: `aria-controls`/`id` no nav, `focusable="false"` nos SVGs, 12 material-icons `aria-hidden` |
+| Contraste | Ajustar pares com falha | ✅ Texto `#020008` sobre accent (7.38:1 AAA) em vez de escurecer o accent (identidade preservada); sociais 6.92:1 |
+| Auditoria | WCAG 2.1 AA completa | ✅ Checklist documentado; achados novos incorporados (2.4.3 inert, overlay focus-within) |
+| Headings | Corrigir ordem | ✅ logo `h3`→`p.logo-name`; skills `h4`→`h3` (H1→H2→H3→H4) |
+
+### Entregas não previstas
+
+- **2.4.3 Focus Order (crítico, achado da auditoria)**: 10 controles focáveis invisíveis com sidebar fechada — resolvido com `[attr.inert]` (removido quando `sidebarOpen`, mantendo a tab order em mobile aberta/desktop)
+- **Overlay hover-only**: `:focus-within` no `.project-image` torna os links visíveis na navegação por Tab
+- **~135 linhas de SCSS morto removido** (`.stats`, `.tech-*`) — classes inexistentes no template; também resolveu `no-descending-specificity` disparado pelo novo `h3`
+- **Contagem corrigida**: são 6 (não 8) links de projeto sem nome acessível (auditoria precisa)
+
+### Pendências
+
+- **Hero: texto `#ccc` sobre foto panorâmica** — contraste não garantido (pré-existente, requer avaliação visual humana) → backlog
+- **Foco automático no drawer ao abrir** (APG) — deferido para não alterar `toggleSidebar()`; controles alcançáveis via Shift+Tab → backlog
+- **`:focus`/`:focus-visible` redundantes** (regras idênticas) — simplificar em refatoração futura → backlog (cosmético)
+- **Target size dos ícones sociais (40×40px)** — atende AA (24px), não AAA → ok/backlog
+- Execução real do CI pendente do incidente do GitHub Actions
+
+---
+
+## Commits principais
+
+| Commit | Descrição |
+|--------|-----------|
+| `34548a8` | docs(fase-04): create planning for WCAG 2.1 AA accessibility audit |
+| `6849cb0` | docs(fase-04): register WCAG baseline audit (Lighthouse 90, 3 failures) |
+| `7c1ca81` | feat(a11y): skip link, focus styles, ARIA labels and WCAG fixes (Lighthouse 100) |
+| `2ed8556` | test(a11y): cover skip link, accessible names, aria-expanded and nav label |
 
 ---
 
