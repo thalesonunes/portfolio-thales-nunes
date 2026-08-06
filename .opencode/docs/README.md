@@ -8,7 +8,7 @@
 
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
-|    |              |        |           |
+| 04 | Acessibilidade: Auditoria WCAG 2.1 AA + Correções | 📋 Planejada | `fase-04-acessibilidade.md` |
 
 ---
 
