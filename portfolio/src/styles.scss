@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap';
+@import 'https://fonts.googleapis.com/icon?family=Material+Icons';
 
 /* Global Styles */
 * {
@@ -16,7 +16,7 @@
   --bg-gradient: linear-gradient(135deg, #020008 0%, #2c394c 50%, #1d719d 100%);
 
   /* Text Colors */
-  --text-primary: #ffffff;
+  --text-primary: #fff;
   --text-secondary: #ff6b35;    /* Orange from palette */
   --text-muted: #908388;        /* Muted brown-grey */
 
@@ -43,7 +43,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
@@ -89,7 +89,7 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 15px 35px rgba(255, 107, 53, 0.4);
+      box-shadow: 0 15px 35px rgb(255 107 53 / 40%);
       background: var(--accent-secondary);
     }
   }
@@ -103,7 +103,7 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
       background: var(--accent-primary);
       color: var(--bg-primary);
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
+      box-shadow: 0 10px 25px rgb(255 107 53 / 30%);
     }
   }
 
@@ -114,7 +114,7 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 20%), transparent);
     transition: left 0.5s;
   }
 
@@ -124,11 +124,11 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
 }
 
 .card {
-  background: rgba(255, 107, 53, 0.1);
+  background: rgb(255 107 53 / 10%);
   backdrop-filter: blur(10px);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  border: 1px solid rgba(255, 107, 53, 0.1);
+  border: 1px solid rgb(255 107 53 / 10%);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   overflow: hidden;
@@ -136,11 +136,8 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
   &::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 107, 53, 0.05), rgba(229, 90, 43, 0.05));
+    inset: 0;
+    background: linear-gradient(135deg, rgb(255 107 53 / 5%), rgb(229 90 43 / 5%));
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: -1;
@@ -148,10 +145,10 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
 
   &:hover {
     transform: translateY(-8px) scale(1.02);
-    border-color: rgba(255, 107, 53, 0.3);
+    border-color: rgb(255 107 53 / 30%);
     box-shadow:
-      0 25px 50px rgba(2, 0, 8, 0.4),
-      0 0 30px rgba(255, 107, 53, 0.1);
+      0 25px 50px rgb(2 0 8 / 40%),
+      0 0 30px rgb(255 107 53 / 10%);
 
     &::before {
       opacity: 1;
@@ -177,15 +174,16 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, var(--accent-secondary), var(--accent-primary));
-  box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 0 10px rgb(255 107 53 / 30%);
 }
 
 /* Animations */
-@keyframes fadeInUp {
+@keyframes fade-in-up {
   from {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -193,11 +191,11 @@ h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
 }
 
 .animate-fade-up {
-  animation: fadeInUp 0.6s ease forwards;
+  animation: fade-in-up 0.6s ease forwards;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .container {
     padding: 0 var(--spacing-md);
   }

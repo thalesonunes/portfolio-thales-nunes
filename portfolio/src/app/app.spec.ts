@@ -1,6 +1,52 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app';
 
+/** The real Date constructor, captured before any test replaces the global one. */
+const RealDate = Date;
+
+/**
+ * Static surface required to replace the global `Date` in tests.
+ * `prototype` is intentionally mutable so the mock can reuse the real Date prototype.
+ */
+interface DateMock {
+  new (...args: unknown[]): Date;
+  (...args: unknown[]): unknown;
+  prototype: Date;
+  now(): number;
+  UTC(...args: number[]): number;
+  parse(dateString: string): number;
+}
+
+/**
+ * Replaces the global `Date` so that `new Date()` (no args) returns a fixed date,
+ * while `new Date(year, month, day)` still delegates to the real implementation.
+ */
+function mockToday(year: number, month: number, day: number): Date {
+  const fakeNow = new RealDate(year, month, day);
+
+  function MockDate(this: unknown, ...args: unknown[]): Date {
+    if (args.length === 0) {
+      return fakeNow;
+    }
+    // Let the real constructor handle it (works for new Date(2022, 0, 1) etc.)
+    return Reflect.construct(RealDate, args, new.target ?? MockDate) as Date;
+  }
+
+  const mock = MockDate as unknown as DateMock;
+  mock.prototype = RealDate.prototype;
+  mock.now = () => fakeNow.getTime();
+  mock.UTC = RealDate.UTC.bind(RealDate);
+  mock.parse = RealDate.parse.bind(RealDate);
+
+  (globalThis as { Date: DateMock }).Date = mock;
+  return fakeNow;
+}
+
+/** Restores the original global Date after a test that mocked it. */
+function restoreDate(): void {
+  (globalThis as { Date: DateMock }).Date = RealDate;
+}
+
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -50,40 +96,7 @@ describe('AppComponent', () => {
   });
 
   describe('experience text calculation', () => {
-    const OriginalDate = Date;
-
-    /**
-     * Replaces global Date so that `new Date()` (no args) returns a fixed date.
-     * `new Date(year, month, day)` still delegates to the real implementation.
-     */
-    function mockToday(year: number, month: number, day: number): Date {
-      const fakeNow = new OriginalDate(year, month, day);
-
-      const MockDate: any = function (this: any, ...args: any[]) {
-        if (args.length === 0) {
-          return fakeNow;
-        }
-        // Let the real constructor handle it (works for new Date(2022, 0, 1) etc.)
-        const inst = Reflect.construct(
-          OriginalDate,
-          args,
-          new.target ?? MockDate,
-        );
-        return inst;
-      };
-
-      MockDate.prototype = OriginalDate.prototype;
-      MockDate.now = () => fakeNow.getTime();
-      MockDate.UTC = OriginalDate.UTC.bind(OriginalDate);
-      MockDate.parse = OriginalDate.parse.bind(OriginalDate);
-
-      (globalThis as any).Date = MockDate;
-      return fakeNow;
-    }
-
-    afterEach(() => {
-      (globalThis as any).Date = OriginalDate;
-    });
+    afterEach(restoreDate);
 
     it('should return "4 anos e 7 meses" for August 6, 2026 (start: Jan 2022)', () => {
       mockToday(2026, 7, 6);
@@ -131,37 +144,13 @@ describe('AppComponent', () => {
   });
 
   describe('template rendering', () => {
-    const OriginalDate = Date;
-
-    afterEach(() => {
-      (globalThis as any).Date = OriginalDate;
-    });
+    afterEach(restoreDate);
 
     it('should display experience text in the about section', () => {
-      const fakeNow = new OriginalDate(2026, 7, 6);
-
-      const MockDate: any = function (this: any, ...args: any[]) {
-        if (args.length === 0) {
-          return fakeNow;
-        }
-        const inst = Reflect.construct(
-          OriginalDate,
-          args,
-          new.target ?? MockDate,
-        );
-        return inst;
-      };
-
-      MockDate.prototype = OriginalDate.prototype;
-      MockDate.now = () => fakeNow.getTime();
-      MockDate.UTC = OriginalDate.UTC.bind(OriginalDate);
-      MockDate.parse = OriginalDate.parse.bind(OriginalDate);
-
-      (globalThis as any).Date = MockDate;
-
+      mockToday(2026, 7, 6);
       const fixture = TestBed.createComponent(AppComponent);
       fixture.detectChanges();
-      const aboutSection = fixture.nativeElement.querySelector(
+      const aboutSection = (fixture.nativeElement as HTMLElement).querySelector(
         '#about',
       ) as HTMLElement;
       expect(aboutSection?.textContent).toContain('4 anos e 7 meses');

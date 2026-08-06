@@ -23,8 +23,8 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 ### Técnico
 - [ ] E2E tests com Playwright/Cypress
 - [ ] Storybook para componentes
-- [ ] Lint (ESLint + angular-eslint + stylelint)
-- [ ] CI com lint + typecheck + test + build
+- [x] **Lint (ESLint + angular-eslint + stylelint)** — ✅ entregue na Fase 03: ESLint 9 flat config (recommended + type-checked) + stylelint standard-scss, 0 problemas no código, scripts npm (lint, lint:styles, typecheck)
+- [ ] CI com lint + typecheck + test + build — ⚠️ parcialmente entregue na Fase 03 (steps no workflow de deploy); test e build já rodam no CI
 - [ ] Performance budgets monitoring (Lighthouse CI)
 
 ### Acessibilidade
@@ -41,6 +41,7 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] Verificar budgets de produção no CI
 - [ ] 8 links SVG de overlay dos projetos sem nome acessível (sem `aria-label`/`title`) — leitores de tela anunciam "link vazio" (identificado na revisão da Fase 02)
 - [ ] Aviso `baseline-browser-mapping` desatualizado no build/test (corrigir com `npm i baseline-browser-mapping@latest -D`)
+- [ ] Duplicata leve de `.animate-fade-up` (styles.scss 0.6s vs app.scss 0.8s) — unificar em refatoração futura
 - [ ] `AppComponent` sem `ChangeDetection.OnPush` (melhoria de performance)
 
 ---

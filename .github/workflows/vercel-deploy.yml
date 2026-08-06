@@ -22,6 +22,18 @@ jobs:
         run: npm ci
         working-directory: ./portfolio
 
+      - name: Lint (ESLint)
+        run: npm run lint
+        working-directory: ./portfolio
+
+      - name: Lint styles (Stylelint)
+        run: npm run lint:styles
+        working-directory: ./portfolio
+
+      - name: Typecheck
+        run: npm run typecheck
+        working-directory: ./portfolio
+
       - name: Build project
         run: npm run build
         working-directory: ./portfolio
