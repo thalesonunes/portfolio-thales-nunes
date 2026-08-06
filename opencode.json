@@ -5,6 +5,17 @@
     "AGENTS.md",
     ".opencode/instructions/*.md"
   ],
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": true
+    }
+  },
   "permission": {
     "skill": {
       "*": "allow"

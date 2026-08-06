@@ -11,12 +11,14 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] Animações de entrada mais suaves (IntersectionObserver)
 - [ ] Micro-interações nos cards de projetos (hover/tap)
 - [ ] Otimização de imagens (WebP, srcset, lazy loading nativo)
+- [ ] **Revisão completa do layout mobile** — auditar todas as seções (Hero, Sobre, Competências, Projetos, Experiência, Contato) em diversos tamanhos de tela (ex: 320px, 375px, 768px, 1024px) usando o Playwright MCP (browser_navigate + browser_take_screenshot). Verificar: overflow horizontal, sidebar/toggle mobile, timeline da experiência, grid de competências, cards de projetos, hierarquia tipográfica e touch targets. Critérios: sem scroll horizontal, sem conteúdo cortado, alinhamento consistente.
 
 ### Funcionalidades
 - [ ] Formulário de contato funcional (Supabase/emailjs)
 - [ ] Blog/artigos section (MDX ou CMS headless)
 - [ ] Internacionalização (pt/en)
 - [ ] Analytics privativo (Plausible/Umami)
+- [ ] **Cálculo automático de experiência** — hoje a Hero Section (app.html) tem o texto fixo "Engenheiro de Software com aproximadamente 3 anos de experiência...". O valor deve ser calculado automaticamente: transição de carreira para tecnologia em **janeiro de 2022**; exibir anos e meses dinâmicos (ex: "4 anos e 7 meses") com base na data atual, atualizando sozinho sem edição manual. Decisão pendente: calcular no `AppComponent` (TS, data do servidor) vs. estático no build.
 
 ### Técnico
 - [ ] E2E tests com Playwright/Cypress
