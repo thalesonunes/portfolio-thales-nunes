@@ -1,7 +1,7 @@
 # Fase 03 — Lint (ESLint + stylelint) e typecheck com CI
 
 **Branch:** `feature/fase-03-lint-typecheck`
-**Status:** 📋 Planejada
+**Status:** ✅ Concluída
 
 ---
 
@@ -205,11 +205,45 @@ Cada task deve:
 
 ## Critérios de Aceitação
 
-- [ ] `npm run lint` → 0 problemas (erros E warnings)
-- [ ] `npm run lint:styles` → 0 problemas
-- [ ] `npm run typecheck` → exit 0
-- [ ] `npm test` → 15/15 passando
-- [ ] `npm run build` → sem erros, budgets OK
-- [ ] CI atualizado com lint + typecheck (YAML válido)
-- [ ] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
-- [ ] Revisão final (`review-portfolio`) aprovada
+- [x] `npm run lint` → 0 problemas (erros E warnings)
+- [x] `npm run lint:styles` → 0 problemas
+- [x] `npm run typecheck` → exit 0
+- [x] `npm test` → 15/15 passando
+- [x] `npm run build` → sem erros, budgets OK (286.53 kB initial)
+- [x] CI atualizado com lint + typecheck (YAML válido)
+- [x] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
+- [x] Revisão final (`review-portfolio`) aprovada
+
+---
+
+## Delta (Plano vs. Entrega)
+
+| Aspecto | Plano | Entrega |
+|---------|-------|---------|
+| ESLint | angular-eslint v19 | ✅ **v20.7.0** (versão que acompanha Angular 20; configs `tsRecommended`/`templateRecommended` + `templateAccessibility`) |
+| Rigor | recommended + type-checked | ✅ Igual — recommendedTypeChecked com projectService |
+| Correções | Todas | ✅ 310 problemas corrigidos (30 TS no spec + 279 SCSS + 1 styles.scss), **zero disables**, zero `any` |
+| CI | Lint + typecheck no workflow | ✅ Igual — 3 steps antes do build |
+| Mock de Date nos testes | Ajustar tipos | ✅ Extraído para helpers de módulo (`RealDate`, `mockToday`, `restoreDate`, interface `DateMock`) — eliminou duplicação e os `any` |
+
+### Entregas não previstas
+
+- Duplicação do mock de `Date` removida (estava em 2 describes, virou helper de módulo reutilizado)
+- `no-descending-specificity` (7 erros) resolvido com reorder seguro de regras + `:where(.logo)` — sem mudança visual
+
+### Pendências
+
+- **`baseline-browser-mapping` desatualizado** (warning no build/test) → backlog (1 comando para resolver)
+- **Duplicata leve de `.animate-fade-up`** (styles.scss 0.6s vs app.scss 0.8s) — pré-existente → backlog (refatoração futura)
+- **Execução real do CI pendente** do incidente global do GitHub Actions (steps configurados e YAML validado; rodará quando o GitHub se recuperar)
+
+---
+
+## Commits principais
+
+| Commit | Descrição |
+|--------|-----------|
+| `88cd88d` | docs(fase-03): create planning for lint, typecheck and CI |
+| `4c54504` | chore(lint): setup ESLint+angular-eslint, stylelint and typecheck scripts |
+| `179e495` | refactor(lint): fix all ESLint and stylelint issues (0 problems) |
+| `4ef107c` | ci: add lint and typecheck steps to deploy workflow |
