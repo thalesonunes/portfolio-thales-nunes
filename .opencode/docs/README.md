@@ -17,6 +17,7 @@
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
 | 01 | Cálculo automático de experiência (Sobre Mim) | ✅ Concluída | `fase-01-calculo-experiencia.md` |
+| 02 | Correção segurança/SEO: rel noopener, favicon e typo SVG | ✅ Concluída | `fase-02-links-noopener-e-favicon.md` |
 
 ---
 

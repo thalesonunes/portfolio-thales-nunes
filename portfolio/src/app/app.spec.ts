@@ -167,4 +167,40 @@ describe('AppComponent', () => {
       expect(aboutSection?.textContent).toContain('4 anos e 7 meses');
     });
   });
+
+  describe('security: rel="noopener noreferrer" regression', () => {
+    it('should have rel containing noopener and noreferrer on EVERY external link', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+
+      const externalLinks: NodeListOf<HTMLAnchorElement> =
+        compiled.querySelectorAll('a[target="_blank"]');
+
+      // Regression guard: at least one external link must exist
+      expect(externalLinks.length).toBeGreaterThan(0);
+
+      externalLinks.forEach((link) => {
+        const rel = (link.getAttribute('rel') || '').toLowerCase();
+        expect(rel).toContain('noopener');
+        expect(rel).toContain('noreferrer');
+      });
+    });
+
+    it('should NOT have target="_blank" on mailto links', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+
+      const mailLinks: NodeListOf<HTMLAnchorElement> =
+        compiled.querySelectorAll('a[href^="mailto:"]');
+
+      // Sanity: there should be at least one mailto link
+      expect(mailLinks.length).toBeGreaterThan(0);
+
+      mailLinks.forEach((link) => {
+        expect(link.getAttribute('target')).toBeNull();
+      });
+    });
+  });
 });
