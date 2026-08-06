@@ -40,3 +40,13 @@ npm run watch        # incremental build watch mode
 - `.opencode/instructions/` — Angular, Testes, Segurança, Regra do Escoteiro
 - `.opencode/commands/` — `gerar-testes`, `preparar-pr`
 - Use `/gerar-testes` para planos de teste, `/preparar-pr` para preparar PRs
+
+## Git Setup (one-time per clone)
+- `git config commit.template .gitmessage` — editor abre com template de commit
+- Hooks (`scripts/git-hooks/`) não são versionados no `.git/hooks/` — reinstalar após clone:
+  ```bash
+  ln -sf ../../scripts/git-hooks/commit-msg .git/hooks/commit-msg
+  ln -sf ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit
+  ln -sf ../../scripts/git-hooks/pre-push .git/hooks/pre-push
+  ```
+- Hooks bloqueiam commits diretos em `main`/`master` e exigem build no pre-push
