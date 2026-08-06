@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "deepseek/deepseek-v4-pro",
+  "instructions": [
+    "AGENTS.md",
+    ".opencode/instructions/*.md"
+  ],
+  "permission": {
+    "skill": {
+      "*": "allow"
+    },
+    "question": "allow"
+  }
+}

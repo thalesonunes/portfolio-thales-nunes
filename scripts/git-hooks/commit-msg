@@ -1,0 +1,37 @@
+#!/bin/sh
+# Commit-msg hook — valida o formato da mensagem de commit
+# Instalar: ln -sf ../../scripts/git-hooks/commit-msg .git/hooks/commit-msg
+
+COMMIT_MSG=$(cat "$1")
+
+# Verifica comprimento mínimo
+MSG_LENGTH=$(echo "$COMMIT_MSG" | head -1 | wc -c)
+if [ "$MSG_LENGTH" -lt 10 ]; then
+  echo "❌ Mensagem de commit muito curta (mínimo 10 caracteres)."
+  echo "   Formato esperado: tipo(escopo): descrição"
+  echo "   Ex: feat(hero): adicionar animação de entrada"
+  exit 1
+fi
+
+# Verifica formato: tipo: descrição ou tipo(escopo): descrição
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -1)
+if ! echo "$FIRST_LINE" | grep -qE '^[a-z]+(\([a-z0-9-]+\))?: '; then
+  echo "❌ Formato de commit inválido."
+  echo "   Esperado: tipo(escopo): descrição"
+  echo "   Ex: fix(sidebar): corrigir toggle no mobile"
+  echo "   Recebido: $FIRST_LINE"
+  exit 1
+fi
+
+# Verifica tipos permitidos
+TYPE=$(echo "$FIRST_LINE" | sed -E 's/^([a-z]+).*/\1/')
+case "$TYPE" in
+  feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|breaking) ;;
+  *)
+    echo "❌ Tipo de commit não reconhecido: '$TYPE'"
+    echo "   Tipos válidos: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, breaking"
+    exit 1
+    ;;
+esac
+
+echo "✅ Commit-msg OK"
