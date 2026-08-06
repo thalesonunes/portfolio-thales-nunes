@@ -7,7 +7,7 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 ## 💡 Ideias / Melhorias Futuras
 
 ### Visual & UX
-- [ ] Tema escuro (dark mode) com toggle persistido
+- [x] ~~Tema escuro (dark mode) com toggle persistido~~ — ❌ **cancelado (decisão 06/08/2026)**: o site já é dark por design (identidade visual, `--bg-primary: #020008`); dark mode só faria sentido com um modo claro para alternar, e a auditoria WCAG da Fase 04 validou o contraste com Lighthouse a11y 100/100 — sem déficit de acessibilidade
 - [ ] Animações de entrada mais suaves (IntersectionObserver)
 - [ ] Micro-interações nos cards de projetos (hover/tap)
 - [ ] Otimização de imagens (WebP, srcset, lazy loading nativo)
