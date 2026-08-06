@@ -27,8 +27,8 @@ npm run watch        # incremental build watch mode
 - Production budgets: 500kB initial / 1MB max, 25kB/30kB per component style
 
 ## Vercel Config
-- Root `vercel.json` only sets `"public": true`
-- Actual build output: `dist/portfolio/` (Angular default)
+- Effective config: `portfolio/vercel.json` (buildCommand, outputDirectory `dist/portfolio/browser`, installCommand)
+- No root `vercel.json` (removed — `public` property is not valid in Vercel schema)
 
 ## Gotchas
 - Always run commands from `portfolio/` directory, not root
