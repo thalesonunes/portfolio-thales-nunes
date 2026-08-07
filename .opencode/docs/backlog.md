@@ -10,7 +10,7 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [x] ~~Tema escuro (dark mode) com toggle persistido~~ — ❌ **cancelado (decisão 06/08/2026)**: o site já é dark por design (identidade visual, `--bg-primary: #020008`); dark mode só faria sentido com um modo claro para alternar, e a auditoria WCAG da Fase 04 validou o contraste com Lighthouse a11y 100/100 — sem déficit de acessibilidade
 - [ ] Animações de entrada mais suaves (IntersectionObserver)
 - [ ] Micro-interações nos cards de projetos (hover/tap)
-- [ ] Otimização de imagens (WebP, srcset, lazy loading nativo)
+- [x] **Otimização de imagens (WebP, srcset, lazy loading nativo)** — ✅ entregue na Fase 06: 12 WebPs (480/960/1280w) + hero WebP, `<picture>` com fallback jpg, lazy loading, órfãos removidos (eu.png 1.25MB). LCP 271ms, CLS 0.00
 - [x] **Revisão completa do layout mobile** — ✅ entregue na Fase 05: auditoria em 6 viewports (320-1440px), 0 overflow horizontal (medição objetiva), timeline corrigida (mobile + 1024px), skip-link sem colisão, tipografia refinada em ≤768px. Lighthouse a11y mantido 100/100, 28 testes
 
 ### Funcionalidades
@@ -43,6 +43,8 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] Foco automático no drawer ao abrir (APG) — deferido na Fase 04; controles alcançáveis via Shift+Tab
 - [ ] `:focus`/`:focus-visible` redundantes (regras idênticas) — simplificar (cosmético)
 - [ ] Aviso `baseline-browser-mapping` desatualizado no build/test (corrigir com `npm i baseline-browser-mapping@latest -D`)
+- [ ] `sizes` das imagens de projeto: mobile `100vw` ignora padding (usar `calc(100vw - 4rem)`) — identificado na revisão da Fase 06 (P2, ~15KB)
+- [ ] WebPs 1280w parcialmente redundantes em desktop — avaliar redução em fase futura (P3, Fase 06)
 - [ ] Duplicata leve de `.animate-fade-up` (styles.scss 0.6s vs app.scss 0.8s) — unificar em refatoração futura
 - [ ] `AppComponent` sem `ChangeDetection.OnPush` (melhoria de performance)
 
