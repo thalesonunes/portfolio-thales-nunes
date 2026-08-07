@@ -8,7 +8,7 @@
 
 | Nº | Nome da Fase | Status | Documento |
 |----|--------------|--------|-----------|
-| 06 | Otimização de imagens (WebP, srcset, lazy loading) | 📋 Planejada | `fase-06-otimizacao-imagens.md` |
+|    |              |        |           |
 
 ---
 
@@ -21,6 +21,7 @@
 | 03 | Lint (ESLint + stylelint) e typecheck com CI | ✅ Concluída | `fase-03-lint-typecheck.md` |
 | 04 | Acessibilidade: Auditoria WCAG 2.1 AA + Correções | ✅ Concluída | `fase-04-acessibilidade.md` |
 | 05 | Revisão completa do layout mobile e responsividade | ✅ Concluída | `fase-05-revisao-mobile.md` |
+| 06 | Otimização de imagens (WebP, srcset, lazy loading) | ✅ Concluída | `fase-06-otimizacao-imagens.md` |
 
 ---
 

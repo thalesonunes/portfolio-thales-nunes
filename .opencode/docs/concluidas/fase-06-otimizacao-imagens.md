@@ -1,7 +1,7 @@
 # Fase 06 — Otimização de imagens (WebP, srcset, lazy loading)
 
 **Branch:** `feature/fase-06-otimizacao-imagens`
-**Status:** 📋 Planejada
+**Status:** ✅ Concluída
 
 ---
 
@@ -194,3 +194,36 @@ Cada task deve:
 - [ ] Lints zerados, typecheck OK, build OK (budgets)
 - [ ] **Para cada task: "Como confirmar que está correto?" respondido** (obrigatório)
 - [ ] Revisão final (`review-portfolio`) aprovada
+
+---
+
+## Delta (Plano vs. Entrega)
+
+| Aspecto | Plano | Entrega |
+|---------|-------|---------|
+| WebPs de projeto | 12 (4 × 3 tamanhos) | ✅ Igual — 480/960/1280w, qualidade 80, filtro Lanczos |
+| `<picture>` | srcset/sizes/lazy | ✅ Igual — sizes calibrados ao CSS real (100vw/94vw/560px); width/height 600×295 (CLS 0.00); alts intactos |
+| Hero WebP | WebP direto (decisão) | ✅ Igual — /assets/eu-panoramico.webp com comentário documentado |
+| Órfãos | Remover 2 | ✅ Removidos 3 (eu.png 1.25MB + public/eu-panoramico.jpg + src/assets/eu-panoramico.jpg) |
+| Testes | 4 novos | ✅ 32/32 — pictures, srcset 3 entries, lazy/alt/dimensões, fallback jpg |
+
+### Entregas não previstas
+
+- **Descoberta**: fontes dos projetos são 600×295 (menores que o assumido) — 960/1280w são upscales; ganho real está no hero (−50%) e mobile (−57%)
+- JPGs originais **mantidos** em public/ como fallback (não foram removidos — apenas os órfãos)
+
+### Pendências
+
+- **P2**: `sizes` mobile = `100vw` ignora padding de 64px (seleciona 960w em vez de 480w em 375-700px, ~15KB total) → ajustar para `calc(100vw - 4rem)` em fase futura → backlog
+- **P3**: 1280w parcialmente redundante em desktop (DPR 2 precisa 1120px) — manter ou reduzir em fase futura → backlog
+- Execução real do CI pendente do incidente do GitHub Actions
+
+---
+
+## Commits principais
+
+| Commit | Descrição |
+|--------|-----------|
+| `a53998c` | docs(fase-06): create planning for image optimization (WebP, srcset, lazy) |
+| `eb8316a` | perf(images): WebP srcset, lazy loading, hero WebP and remove orphan assets |
+| `09b0ad0` | test(images): cover picture webp srcset, lazy loading and jpg fallback |
