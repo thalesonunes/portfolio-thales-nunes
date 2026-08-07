@@ -496,4 +496,122 @@ describe('AppComponent', () => {
       });
     });
   });
+
+  /**
+   * Otimização de imagens — Fase 06, TASK 5.
+   *
+   * Verifica a conversão para <picture>/<source>/<img> com WebP responsivo,
+   * lazy loading, dimensões explícitas e fallback JPG.
+   */
+  describe('image optimization (Fase 06)', () => {
+    /** Returns all picture elements rendered in the component. */
+    function queryPictures(fixture: ReturnType<typeof TestBed.createComponent>): NodeListOf<HTMLPictureElement> {
+      fixture.detectChanges();
+      return (fixture.nativeElement as HTMLElement).querySelectorAll('picture');
+    }
+
+    it('should have exactly 4 picture elements (one per project)', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      const pictures = queryPictures(fixture);
+      expect(pictures.length).withContext('4 projects = 4 pictures').toBe(4);
+    });
+
+    it('each picture should have a source with type="image/webp" and exactly 3 srcset entries', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      const pictures = queryPictures(fixture);
+
+      pictures.forEach((picture, idx) => {
+        const sources: NodeListOf<HTMLSourceElement> =
+          picture.querySelectorAll('source[type="image/webp"]');
+        expect(sources.length)
+          .withContext(`picture[${idx}] must have exactly 1 <source type="image/webp">`)
+          .toBe(1);
+
+        const srcset = sources[0].getAttribute('srcset') ?? '';
+        const entries = srcset
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+        expect(entries.length)
+          .withContext(`picture[${idx}] srcset must have exactly 3 descriptors`)
+          .toBe(3);
+
+        // Each entry must end with 480w, 960w, or 1280w
+        const expectedWidths = ['480w', '960w', '1280w'];
+        entries.forEach((entry) => {
+          const parts = entry.split(/\s+/);
+          const descriptor = parts[parts.length - 1];
+          expect(expectedWidths)
+            .withContext(`picture[${idx}] srcset entry "${entry}" descriptor must be one of 480w/960w/1280w`)
+            .toContain(descriptor);
+        });
+      });
+    });
+
+    it('each picture img should have loading="lazy", decoding="async", non-empty alt, numeric width and height', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      const pictures = queryPictures(fixture);
+
+      pictures.forEach((picture, idx) => {
+        const img: HTMLImageElement | null = picture.querySelector('img');
+        expect(img).withContext(`picture[${idx}] must contain an <img>`).toBeTruthy();
+
+        const imgEl = img!;
+        expect(imgEl.getAttribute('loading'))
+          .withContext(`picture[${idx}] img must have loading="lazy"`)
+          .toBe('lazy');
+        expect(imgEl.getAttribute('decoding'))
+          .withContext(`picture[${idx}] img must have decoding="async"`)
+          .toBe('async');
+
+        const alt = imgEl.getAttribute('alt') ?? '';
+        expect(alt.trim().length)
+          .withContext(`picture[${idx}] img must have non-empty alt`)
+          .toBeGreaterThan(0);
+
+        const width = Number(imgEl.getAttribute('width'));
+        const height = Number(imgEl.getAttribute('height'));
+        expect(width)
+          .withContext(`picture[${idx}] img width must be a positive integer`)
+          .toBeGreaterThan(0);
+        expect(Number.isInteger(width))
+          .withContext(`picture[${idx}] img width must be an integer`)
+          .toBeTrue();
+        expect(height)
+          .withContext(`picture[${idx}] img height must be a positive integer`)
+          .toBeGreaterThan(0);
+        expect(Number.isInteger(height))
+          .withContext(`picture[${idx}] img height must be an integer`)
+          .toBeTrue();
+      });
+    });
+
+    it('each img inside picture should have src pointing to .jpg (fallback)', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      const pictures = queryPictures(fixture);
+      const expectedJpgs = ['minha-guita', 'plano-truco', 'donedep', 'deveria'];
+
+      const actualJpgs: string[] = [];
+      pictures.forEach((picture) => {
+        const img: HTMLImageElement | null = picture.querySelector('img');
+        if (img) {
+          // Extract the basename without extension from src
+          const src = img.getAttribute('src') ?? '';
+          const match = /\/([^/]+)\.jpg$/.exec(src);
+          if (match) {
+            actualJpgs.push(match[1]);
+          }
+        }
+      });
+
+      expect(actualJpgs.length)
+        .withContext('all 4 imgs must have a .jpg src')
+        .toBe(4);
+      expectedJpgs.forEach((expected) => {
+        expect(actualJpgs)
+          .withContext(`must include ${expected}.jpg fallback`)
+          .toContain(expected);
+      });
+    });
+  });
 });
