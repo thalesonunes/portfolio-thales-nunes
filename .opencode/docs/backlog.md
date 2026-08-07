@@ -24,7 +24,7 @@ Itens futuros, ideias e pendências conhecidas. Ordenado por prioridade aproxima
 - [ ] E2E tests com Playwright/Cypress
 - [ ] Storybook para componentes
 - [x] **Lint (ESLint + angular-eslint + stylelint)** — ✅ entregue na Fase 03: ESLint 9 flat config (recommended + type-checked) + stylelint standard-scss, 0 problemas no código, scripts npm (lint, lint:styles, typecheck)
-- [ ] CI com lint + typecheck + test + build — ⚠️ parcialmente entregue na Fase 03 (steps no workflow de deploy); test e build já rodam no CI
+- [x] CI com lint + typecheck + test + build — ✅ completo e **validado em produção (07/08/2026)**: após o retorno do GitHub Actions, o workflow rodou lint → lint:styles → typecheck → build → deploy com sucesso (Fases 03 + 13)
 - [ ] Performance budgets monitoring (Lighthouse CI)
 
 ### Acessibilidade
