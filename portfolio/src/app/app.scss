@@ -269,7 +269,12 @@
 // Hero Section - Clean & Professional Design with Panoramic Background
 .hero-section {
   min-height: 100vh;
-  background: url('/assets/eu-panoramico.jpg') center/cover no-repeat;
+
+  // Fase 06: hero em WebP (~50% menor, mesma resolução 1920x944 da fonte).
+  // Decisão: WebP direto sem fallback - suportado por todos os browsers
+  // modernos (Chrome 32+, Firefox 65+, Safari 14+, Edge 18+); background CSS
+  // não suporta <picture>/srcset nativamente.
+  background: url('/assets/eu-panoramico.webp') center/cover no-repeat;
   display: flex;
   align-items: center;
   padding: 0;
